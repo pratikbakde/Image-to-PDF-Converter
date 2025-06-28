@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Image to PDF Converter with Camera & Editor</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -37,7 +40,31 @@
                             </button>
                         </div>
                         
+                        <!-- Camera Selection Dialog -->
+                        <div id="cameraDialog" class="camera-dialog" style="display: none;">
+                            <div class="camera-dialog-content">
+                                <h4>Choose Camera</h4>
+                                <div class="camera-options">
+                                    <button type="button" class="camera-option" onclick="selectCamera('back')">
+                                        <span class="camera-icon">📷</span>
+                                        <span>Back Camera</span>
+                                    </button>
+                                    <button type="button" class="camera-option" onclick="selectCamera('front')">
+                                        <span class="camera-icon">📱</span>
+                                        <span>Front Camera</span>
+                                    </button>
+                                    <button type="button" class="camera-option" onclick="selectCamera('any')">
+                                        <span class="camera-icon">🎯</span>
+                                        <span>Any Camera</span>
+                                    </button>
+                                </div>
+                                <button type="button" class="camera-cancel" onclick="closeCameraDialog()">Cancel</button>
+                            </div>
+                        </div>
+                        
                         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+                        <input type="file" id="frontCameraInput" accept="image/*" capture="user" style="display:none">
+                        <input type="file" id="anyCameraInput" accept="image/*" style="display:none">
                         <input type="file" id="mediaInput" accept="image/*" multiple style="display:none">
                     </div>
                 </div>
@@ -85,6 +112,15 @@
         <footer>
             <p>&copy; 2024 Image to PDF Converter. Made with ❤️</p>
         </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3>Generating PDF...</h3>
+            <p>Please wait while we process your images</p>
+        </div>
     </div>
 
     <!-- Image Editor Modal -->
