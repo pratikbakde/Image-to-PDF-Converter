@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image to PDF Converter with Editor</title>
+    <title>Image to PDF Converter with Camera & Editor</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
@@ -15,7 +15,7 @@
     <div class="container">
         <header>
             <h1>🖼️ Image to PDF Converter</h1>
-            <p>Convert your images to PDF with powerful editing tools</p>
+            <p>Convert your images to PDF with camera capture and powerful editing tools</p>
         </header>
 
         <main>
@@ -23,12 +23,22 @@
                 <div class="upload-area" id="uploadArea">
                     <div class="upload-content">
                         <div class="upload-icon">📁</div>
-                        <h3>Drop images here or click to browse</h3>
+                        <h3>Drop images here or choose an option below</h3>
                         <p>Supports JPG, PNG, GIF, WebP</p>
-                        <input type="file" id="fileInput" multiple accept="image/*" hidden>
-                        <button class="browse-btn" onclick="document.getElementById('fileInput').click()">
-                            Choose Files
-                        </button>
+                        
+                        <div class="upload-options">
+                            <button type="button" class="camera-btn" id="cameraBtn">
+                                <span class="btn-icon">📷</span>
+                                <span class="btn-text">Camera</span>
+                            </button>
+                            <button type="button" class="media-btn" id="mediaBtn">
+                                <span class="btn-icon">🖼️</span>
+                                <span class="btn-text">Media</span>
+                            </button>
+                        </div>
+                        
+                        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+                        <input type="file" id="mediaInput" accept="image/*" multiple style="display:none">
                     </div>
                 </div>
             </div>
@@ -49,6 +59,11 @@
                 <h3>Features</h3>
                 <div class="features-grid">
                     <div class="feature">
+                        <div class="feature-icon">📷</div>
+                        <h4>Camera Capture</h4>
+                        <p>Take photos directly with your device camera</p>
+                    </div>
+                    <div class="feature">
                         <div class="feature-icon">✏️</div>
                         <h4>Image Editor</h4>
                         <p>Rotate, crop, adjust brightness and more</p>
@@ -62,11 +77,6 @@
                         <div class="feature-icon">⚡</div>
                         <h4>Fast Conversion</h4>
                         <p>Quick PDF generation in your browser</p>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">🔒</div>
-                        <h4>Privacy First</h4>
-                        <p>Your images never leave your device</p>
                     </div>
                 </div>
             </div>
@@ -169,4 +179,4 @@
 
     <script src="script.js"></script>
 </body>
-</html> 
+</html>
