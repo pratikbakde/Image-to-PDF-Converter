@@ -1,239 +1,422 @@
 // Global variables
-let selectedImages = [];
+let images = [];
 let currentEditingIndex = -1;
 let fabricCanvas = null;
 let cropper = null;
-let originalImageData = null;
 let isCropMode = false;
+let originalImageData = null;
 
-// DOM elements
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('fileInput');
-const imagesSection = document.getElementById('imagesSection');
-const imagesGrid = document.getElementById('imagesGrid');
-const imageCount = document.getElementById('imageCount');
-const generateBtn = document.getElementById('generateBtn');
-const editorModal = document.getElementById('editorModal');
-const editorCanvas = document.getElementById('editorCanvas');
-const cropContainer = document.getElementById('cropContainer');
-const cropImage = document.getElementById('cropImage');
-
-// Initialize the app
+// Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    setupEventListeners();
-    initializeFabricCanvas();
+    initializeApp();
 });
 
-// Setup all event listeners
+function initializeApp() {
+    setupDragAndDrop();
+    setupEventListeners();
+    setupCameraAndMedia();
+    updateImageCount();
+}
+
+// Setup drag and drop functionality
+function setupDragAndDrop() {
+    const uploadArea = document.getElementById('uploadArea');
+    
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = Array.from(e.dataTransfer.files);
+        const imageFiles = files.filter(file => file.type.startsWith('image/'));
+        
+        if (imageFiles.length > 0) {
+            addImages(imageFiles);
+        }
+    });
+}
+
+// Setup event listeners
 function setupEventListeners() {
-    // File input change
-    fileInput.addEventListener('change', handleFileSelect);
-    
-    // Drag and drop events
-    uploadArea.addEventListener('dragover', handleDragOver);
-    uploadArea.addEventListener('dragleave', handleDragLeave);
-    uploadArea.addEventListener('drop', handleDrop);
-    
-    // Click to upload
-    uploadArea.addEventListener('click', () => fileInput.click());
-    
-    // Modal close events
-    editorModal.addEventListener('click', function(e) {
-        if (e.target === editorModal) {
+    // Close modal when clicking outside
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('editorModal');
+        if (e.target === modal) {
             closeEditor();
         }
     });
     
-    // Keyboard events
+    // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && editorModal.style.display === 'block') {
+        if (e.key === 'Escape') {
             closeEditor();
         }
     });
 }
 
-// Initialize Fabric.js canvas
-function initializeFabricCanvas() {
-    fabricCanvas = new fabric.Canvas('editorCanvas', {
-        width: 600,
-        height: 400,
-        backgroundColor: '#f8f9fa'
+// Setup camera and media functionality
+function setupCameraAndMedia() {
+    const cameraBtn = document.getElementById('cameraBtn');
+    const mediaBtn = document.getElementById('mediaBtn');
+    const cameraInput = document.getElementById('cameraInput');
+    const mediaInput = document.getElementById('mediaInput');
+    
+    // Camera button click handler
+    cameraBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openCamera();
+    });
+    
+    // Media button click handler
+    mediaBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openMedia();
+    });
+    
+    // Camera input change handler
+    cameraInput.addEventListener('change', function(event) {
+        handleCameraSelect(event);
+    });
+    
+    // Media input change handler
+    mediaInput.addEventListener('change', function(event) {
+        handleFileSelect(event);
     });
 }
 
-// Handle file selection
-function handleFileSelect(event) {
-    const files = Array.from(event.target.files);
-    processFiles(files);
-}
-
-// Handle drag over
-function handleDragOver(event) {
-    event.preventDefault();
-    uploadArea.classList.add('dragover');
-}
-
-// Handle drag leave
-function handleDragLeave(event) {
-    event.preventDefault();
-    uploadArea.classList.remove('dragover');
-}
-
-// Handle drop
-function handleDrop(event) {
-    event.preventDefault();
-    uploadArea.classList.remove('dragover');
+// Camera functionality
+function openCamera() {
+    console.log('Opening camera...');
+    const cameraInput = document.getElementById('cameraInput');
     
-    const files = Array.from(event.dataTransfer.files);
-    processFiles(files);
-}
-
-// Process selected files
-function processFiles(files) {
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
-    
-    if (imageFiles.length === 0) {
-        alert('Please select image files only.');
+    // Check if camera is supported
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Camera is not supported in this browser. Please use a modern browser or try the media option instead.');
         return;
     }
     
-    imageFiles.forEach(file => {
-        if (!selectedImages.find(img => img.name === file.name)) {
+    // Try to access camera first to ensure it's available
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+            // Camera is available, trigger file input
+            stream.getTracks().forEach(track => track.stop()); // Stop the stream
+            cameraInput.click();
+        })
+        .catch(function(err) {
+            console.log('Camera access denied or not available:', err);
+            // Still try to open camera input as fallback
+            cameraInput.click();
+        });
+}
+
+function handleCameraSelect(event) {
+    console.log('Camera file selected:', event.target.files);
+    const files = Array.from(event.target.files);
+    if (files.length > 0) {
+        addImages(files);
+    }
+    // Reset input for future use
+    event.target.value = '';
+}
+
+// Media functionality
+function openMedia() {
+    console.log('Opening media picker...');
+    const mediaInput = document.getElementById('mediaInput');
+    mediaInput.click();
+}
+
+function handleFileSelect(event) {
+    console.log('Media files selected:', event.target.files);
+    const files = Array.from(event.target.files);
+    if (files.length > 0) {
+        addImages(files);
+    }
+    // Reset input for future use
+    event.target.value = '';
+}
+
+// Add images to the collection
+function addImages(files) {
+    console.log('Adding images:', files.length);
+    files.forEach(file => {
+        if (file.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const imageData = {
+                    id: Date.now() + Math.random(),
                     name: file.name,
-                    file: file,
+                    size: file.size,
+                    type: file.type,
                     dataUrl: e.target.result,
-                    originalDataUrl: e.target.result // Keep original for reset
+                    originalDataUrl: e.target.result
                 };
-                selectedImages.push(imageData);
-                updateUI();
+                
+                images.push(imageData);
+                updateImageDisplay();
+                updateImageCount();
+                
+                // Show images section if hidden
+                const imagesSection = document.getElementById('imagesSection');
+                if (imagesSection.style.display === 'none') {
+                    imagesSection.style.display = 'block';
+                }
             };
             reader.readAsDataURL(file);
         }
     });
 }
 
-// Update the UI
-function updateUI() {
-    imageCount.textContent = selectedImages.length;
-    
-    if (selectedImages.length > 0) {
-        imagesSection.style.display = 'block';
-        displayImages();
-    } else {
-        imagesSection.style.display = 'none';
-    }
-}
-
-// Display images in grid
-function displayImages() {
+// Update image display
+function updateImageDisplay() {
+    const imagesGrid = document.getElementById('imagesGrid');
     imagesGrid.innerHTML = '';
     
-    selectedImages.forEach((image, index) => {
+    images.forEach((image, index) => {
         const imageItem = document.createElement('div');
         imageItem.className = 'image-item';
-        
         imageItem.innerHTML = `
-            <img src="${image.dataUrl}" alt="${image.name}">
-            <button class="edit-btn" onclick="openEditor(${index})" title="Edit Image">✏️</button>
+            <img src="${image.dataUrl}" alt="${image.name}" onclick="editImage(${index})">
+            <button class="edit-btn" onclick="editImage(${index})" title="Edit Image">✏️</button>
             <button class="remove-btn" onclick="removeImage(${index})" title="Remove Image">×</button>
             <div class="image-name">${image.name}</div>
+            <div class="image-size">${formatFileSize(image.size)}</div>
         `;
-        
         imagesGrid.appendChild(imageItem);
     });
 }
 
-// Open image editor
-function openEditor(index) {
-    currentEditingIndex = index;
-    const image = selectedImages[index];
+// Update image count
+function updateImageCount() {
+    const imageCount = document.getElementById('imageCount');
+    imageCount.textContent = images.length;
     
-    // Load image into canvas
-    fabric.Image.fromURL(image.dataUrl, function(img) {
-        fabricCanvas.clear();
-        
+    const generateBtn = document.getElementById('generateBtn');
+    generateBtn.disabled = images.length === 0;
+}
+
+// Remove image
+function removeImage(index) {
+    images.splice(index, 1);
+    updateImageDisplay();
+    updateImageCount();
+    
+    if (images.length === 0) {
+        const imagesSection = document.getElementById('imagesSection');
+        imagesSection.style.display = 'none';
+    }
+}
+
+// Clear all images
+function clearImages() {
+    images = [];
+    updateImageDisplay();
+    updateImageCount();
+    
+    const imagesSection = document.getElementById('imagesSection');
+    imagesSection.style.display = 'none';
+}
+
+// Edit image
+function editImage(index) {
+    currentEditingIndex = index;
+    const image = images[index];
+    originalImageData = image.originalDataUrl;
+    
+    // Show modal
+    const modal = document.getElementById('editorModal');
+    modal.style.display = 'flex';
+    
+    // Initialize canvas with image
+    initializeFabricCanvas(image.dataUrl);
+    
+    // Reset controls
+    resetControls();
+}
+
+// Initialize Fabric.js canvas
+function initializeFabricCanvas(imageDataUrl) {
+    const canvas = document.getElementById('editorCanvas');
+    const cropContainer = document.getElementById('cropContainer');
+    
+    // Hide crop container initially
+    cropContainer.style.display = 'none';
+    canvas.style.display = 'block';
+    
+    // Destroy existing canvas
+    if (fabricCanvas) {
+        fabricCanvas.dispose();
+    }
+    
+    // Create new canvas
+    fabricCanvas = new fabric.Canvas('editorCanvas', {
+        width: 400,
+        height: 300
+    });
+    
+    // Load image
+    fabric.Image.fromURL(imageDataUrl, function(img) {
         // Scale image to fit canvas
-        const canvasWidth = fabricCanvas.getWidth();
-        const canvasHeight = fabricCanvas.getHeight();
-        const scaleX = canvasWidth / img.width;
-        const scaleY = canvasHeight / img.height;
-        const scale = Math.min(scaleX, scaleY) * 0.8;
+        const canvasWidth = fabricCanvas.width;
+        const canvasHeight = fabricCanvas.height;
+        const imgRatio = img.width / img.height;
+        const canvasRatio = canvasWidth / canvasHeight;
         
-        img.scale(scale);
-        img.set({
-            left: (canvasWidth - img.width * scale) / 2,
-            top: (canvasHeight - img.height * scale) / 2
-        });
+        let scaleX, scaleY;
+        if (imgRatio > canvasRatio) {
+            scaleX = canvasWidth / img.width;
+            scaleY = scaleX;
+        } else {
+            scaleY = canvasHeight / img.height;
+            scaleX = scaleY;
+        }
+        
+        img.scaleX = scaleX;
+        img.scaleY = scaleY;
+        img.left = (canvasWidth - img.width * scaleX) / 2;
+        img.top = (canvasHeight - img.height * scaleY) / 2;
         
         fabricCanvas.add(img);
-        fabricCanvas.setActiveObject(img);
         fabricCanvas.renderAll();
-        
-        // Store original image data
-        originalImageData = image.dataUrl;
-        
-        // Reset controls
-        resetControls();
-        
-        // Show modal
-        editorModal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
     });
 }
 
-// Close editor
-function closeEditor() {
-    editorModal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-    fabricCanvas.clear();
-    
-    // Destroy cropper if exists
-    if (cropper) {
-        cropper.destroy();
-        cropper = null;
-    }
-    
-    // Hide crop container
-    cropContainer.style.display = 'none';
-    editorCanvas.style.display = 'block';
-    isCropMode = false;
-    
-    currentEditingIndex = -1;
-    originalImageData = null;
-}
-
-// Reset controls
+// Reset controls to default values
 function resetControls() {
     document.getElementById('brightness').value = 0;
     document.getElementById('contrast').value = 0;
     document.getElementById('saturation').value = 0;
+    document.getElementById('zoomLevel').value = 1;
+    
+    // Update display values
     document.getElementById('brightnessValue').textContent = '0';
     document.getElementById('contrastValue').textContent = '0';
     document.getElementById('saturationValue').textContent = '0';
-    
-    // Reset zoom
-    document.getElementById('zoomLevel').value = 1;
     document.getElementById('zoomValue').textContent = '100%';
     
     // Reset aspect ratio
     document.getElementById('aspectRatio').value = 'NaN';
 }
 
-// Enable advanced crop mode
+// Rotate image
+function rotateImage(angle) {
+    if (!fabricCanvas || fabricCanvas.getObjects().length === 0) return;
+    
+    const img = fabricCanvas.getObjects()[0];
+    img.rotate = (img.rotate || 0) + angle;
+    fabricCanvas.renderAll();
+}
+
+// Flip image
+function flipImage(direction) {
+    if (!fabricCanvas || fabricCanvas.getObjects().length === 0) return;
+    
+    const img = fabricCanvas.getObjects()[0];
+    if (direction === 'horizontal') {
+        img.flipX = !img.flipX;
+    } else if (direction === 'vertical') {
+        img.flipY = !img.flipY;
+    }
+    fabricCanvas.renderAll();
+}
+
+// Adjust brightness
+function adjustBrightness() {
+    if (!fabricCanvas || fabricCanvas.getObjects().length === 0) return;
+    
+    const brightness = document.getElementById('brightness').value;
+    const img = fabricCanvas.getObjects()[0];
+    
+    // Update display value
+    document.getElementById('brightnessValue').textContent = brightness;
+    
+    // Apply brightness filter
+    img.filters = img.filters || [];
+    const brightnessFilter = new fabric.Image.filters.Brightness({
+        brightness: brightness / 100
+    });
+    
+    // Remove existing brightness filter
+    img.filters = img.filters.filter(filter => !(filter instanceof fabric.Image.filters.Brightness));
+    img.filters.push(brightnessFilter);
+    
+    img.applyFilters();
+    fabricCanvas.renderAll();
+}
+
+// Adjust contrast
+function adjustContrast() {
+    if (!fabricCanvas || fabricCanvas.getObjects().length === 0) return;
+    
+    const contrast = document.getElementById('contrast').value;
+    const img = fabricCanvas.getObjects()[0];
+    
+    // Update display value
+    document.getElementById('contrastValue').textContent = contrast;
+    
+    // Apply contrast filter
+    img.filters = img.filters || [];
+    const contrastFilter = new fabric.Image.filters.Contrast({
+        contrast: contrast / 100
+    });
+    
+    // Remove existing contrast filter
+    img.filters = img.filters.filter(filter => !(filter instanceof fabric.Image.filters.Contrast));
+    img.filters.push(contrastFilter);
+    
+    img.applyFilters();
+    fabricCanvas.renderAll();
+}
+
+// Adjust saturation
+function adjustSaturation() {
+    if (!fabricCanvas || fabricCanvas.getObjects().length === 0) return;
+    
+    const saturation = document.getElementById('saturation').value;
+    const img = fabricCanvas.getObjects()[0];
+    
+    // Update display value
+    document.getElementById('saturationValue').textContent = saturation;
+    
+    // Apply saturation filter
+    img.filters = img.filters || [];
+    const saturationFilter = new fabric.Image.filters.Saturation({
+        saturation: saturation / 100
+    });
+    
+    // Remove existing saturation filter
+    img.filters = img.filters.filter(filter => !(filter instanceof fabric.Image.filters.Saturation));
+    img.filters.push(saturationFilter);
+    
+    img.applyFilters();
+    fabricCanvas.renderAll();
+}
+
+// Enable advanced crop
 function enableAdvancedCrop() {
-    if (currentEditingIndex < 0) return;
+    isCropMode = true;
+    const canvas = document.getElementById('editorCanvas');
+    const cropContainer = document.getElementById('cropContainer');
+    const cropImage = document.getElementById('cropImage');
     
-    const image = selectedImages[currentEditingIndex];
+    // Hide canvas and show crop container
+    canvas.style.display = 'none';
+    cropContainer.style.display = 'block';
     
-    // Hide fabric canvas and show crop container
-    editorCanvas.style.display = 'none';
-    cropContainer.style.display = 'flex';
-    
-    // Set image source
-    cropImage.src = image.dataUrl;
+    // Get current image data
+    const currentImage = images[currentEditingIndex];
+    cropImage.src = currentImage.dataUrl;
     
     // Initialize cropper
     if (cropper) {
@@ -244,7 +427,7 @@ function enableAdvancedCrop() {
         aspectRatio: NaN,
         viewMode: 1,
         dragMode: 'move',
-        autoCropArea: 0.8,
+        autoCropArea: 1,
         restore: false,
         guides: true,
         center: true,
@@ -252,429 +435,195 @@ function enableAdvancedCrop() {
         cropBoxMovable: true,
         cropBoxResizable: true,
         toggleDragModeOnDblclick: false,
+        zoomable: true,
+        zoomOnWheel: true,
+        wheelZoomRatio: 0.1,
         ready: function() {
-            // Set initial zoom
-            setZoom();
+            // Set initial aspect ratio if selected
+            const aspectRatio = document.getElementById('aspectRatio').value;
+            if (aspectRatio !== 'NaN') {
+                cropper.setAspectRatio(parseFloat(aspectRatio));
+            }
         }
     });
-    
-    isCropMode = true;
-}
-
-// Reset crop
-function resetCrop() {
-    if (cropper) {
-        cropper.reset();
-        setZoom();
-    }
 }
 
 // Set aspect ratio
 function setAspectRatio() {
     if (!cropper) return;
     
-    const aspectRatio = parseFloat(document.getElementById('aspectRatio').value);
-    cropper.setAspectRatio(isNaN(aspectRatio) ? NaN : aspectRatio);
+    const aspectRatio = document.getElementById('aspectRatio').value;
+    if (aspectRatio === 'NaN') {
+        cropper.setAspectRatio(NaN);
+    } else {
+        cropper.setAspectRatio(parseFloat(aspectRatio));
+    }
 }
 
 // Set zoom level
 function setZoom() {
     if (!cropper) return;
     
-    const zoomLevel = parseFloat(document.getElementById('zoomLevel').value);
-    const zoomValue = Math.round(zoomLevel * 100);
-    
-    document.getElementById('zoomValue').textContent = zoomValue + '%';
+    const zoomLevel = document.getElementById('zoomLevel').value;
+    document.getElementById('zoomValue').textContent = Math.round(zoomLevel * 100) + '%';
     
     cropper.zoomTo(zoomLevel);
+}
+
+// Reset crop
+function resetCrop() {
+    if (cropper) {
+        cropper.reset();
+        // Reset zoom
+        document.getElementById('zoomLevel').value = 1;
+        document.getElementById('zoomValue').textContent = '100%';
+    }
 }
 
 // Apply crop
 function applyCrop() {
     if (!cropper) return;
     
-    cropper.getCroppedCanvas({
-        width: 800,  // Max width
-        height: 600, // Max height
-        imageSmoothingEnabled: true,
-        imageSmoothingQuality: 'high'
-    }).then(function(canvas) {
-        // Convert canvas to data URL
-        const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-        
-        // Update the image data
-        selectedImages[currentEditingIndex].dataUrl = croppedDataUrl;
-        
-        // Destroy cropper
+    const canvas = cropper.getCroppedCanvas();
+    const croppedDataUrl = canvas.toDataURL('image/png');
+    
+    // Update the image data
+    images[currentEditingIndex].dataUrl = croppedDataUrl;
+    
+    // Exit crop mode
+    exitCropMode();
+    
+    // Reinitialize fabric canvas with cropped image
+    initializeFabricCanvas(croppedDataUrl);
+}
+
+// Exit crop mode
+function exitCropMode() {
+    isCropMode = false;
+    const canvas = document.getElementById('editorCanvas');
+    const cropContainer = document.getElementById('cropContainer');
+    
+    canvas.style.display = 'block';
+    cropContainer.style.display = 'none';
+    
+    if (cropper) {
         cropper.destroy();
         cropper = null;
-        
-        // Hide crop container and show fabric canvas
-        cropContainer.style.display = 'none';
-        editorCanvas.style.display = 'block';
-        isCropMode = false;
-        
-        // Reload image in fabric canvas
-        fabric.Image.fromURL(croppedDataUrl, function(img) {
-            fabricCanvas.clear();
-            
-            const canvasWidth = fabricCanvas.getWidth();
-            const canvasHeight = fabricCanvas.getHeight();
-            const scaleX = canvasWidth / img.width;
-            const scaleY = canvasHeight / img.height;
-            const scale = Math.min(scaleX, scaleY) * 0.8;
-            
-            img.scale(scale);
-            img.set({
-                left: (canvasWidth - img.width * scale) / 2,
-                top: (canvasHeight - img.height * scale) / 2
-            });
-            
-            fabricCanvas.add(img);
-            fabricCanvas.setActiveObject(img);
-            fabricCanvas.renderAll();
-        });
-        
-        showNotification('Crop applied successfully!', 'success');
-    });
-}
-
-// Rotate image
-function rotateImage(angle) {
-    if (isCropMode && cropper) {
-        cropper.rotate(angle);
-    } else {
-        const activeObject = fabricCanvas.getActiveObject();
-        if (activeObject) {
-            activeObject.rotate((activeObject.angle || 0) + angle);
-            fabricCanvas.renderAll();
-        }
-    }
-}
-
-// Flip image
-function flipImage(direction) {
-    if (isCropMode && cropper) {
-        if (direction === 'horizontal') {
-            cropper.scaleX(-cropper.getData().scaleX || -1);
-        } else {
-            cropper.scaleY(-cropper.getData().scaleY || -1);
-        }
-    } else {
-        const activeObject = fabricCanvas.getActiveObject();
-        if (activeObject) {
-            if (direction === 'horizontal') {
-                activeObject.set('flipX', !activeObject.flipX);
-            } else {
-                activeObject.set('flipY', !activeObject.flipY);
-            }
-            fabricCanvas.renderAll();
-        }
-    }
-}
-
-// Adjust brightness
-function adjustBrightness() {
-    if (isCropMode) return; // Don't apply filters in crop mode
-    
-    const value = document.getElementById('brightness').value;
-    document.getElementById('brightnessValue').textContent = value;
-    
-    const activeObject = fabricCanvas.getActiveObject();
-    if (activeObject) {
-        activeObject.filters = activeObject.filters || [];
-        
-        // Remove existing brightness filter
-        activeObject.filters = activeObject.filters.filter(f => f.type !== 'brightness');
-        
-        if (value != 0) {
-            activeObject.filters.push(new fabric.Image.filters.Brightness({
-                brightness: value / 100
-            }));
-        }
-        
-        activeObject.applyFilters();
-        fabricCanvas.renderAll();
-    }
-}
-
-// Adjust contrast
-function adjustContrast() {
-    if (isCropMode) return; // Don't apply filters in crop mode
-    
-    const value = document.getElementById('contrast').value;
-    document.getElementById('contrastValue').textContent = value;
-    
-    const activeObject = fabricCanvas.getActiveObject();
-    if (activeObject) {
-        activeObject.filters = activeObject.filters || [];
-        
-        // Remove existing contrast filter
-        activeObject.filters = activeObject.filters.filter(f => f.type !== 'contrast');
-        
-        if (value != 0) {
-            activeObject.filters.push(new fabric.Image.filters.Contrast({
-                contrast: value / 100
-            }));
-        }
-        
-        activeObject.applyFilters();
-        fabricCanvas.renderAll();
-    }
-}
-
-// Adjust saturation
-function adjustSaturation() {
-    if (isCropMode) return; // Don't apply filters in crop mode
-    
-    const value = document.getElementById('saturation').value;
-    document.getElementById('saturationValue').textContent = value;
-    
-    const activeObject = fabricCanvas.getActiveObject();
-    if (activeObject) {
-        activeObject.filters = activeObject.filters || [];
-        
-        // Remove existing saturation filter
-        activeObject.filters = activeObject.filters.filter(f => f.type !== 'saturation');
-        
-        if (value != 0) {
-            activeObject.filters.push(new fabric.Image.filters.Saturation({
-                saturation: value / 100
-            }));
-        }
-        
-        activeObject.applyFilters();
-        fabricCanvas.renderAll();
     }
 }
 
 // Reset image to original
 function resetImage() {
-    if (originalImageData && currentEditingIndex >= 0) {
-        // Destroy cropper if in crop mode
-        if (cropper) {
-            cropper.destroy();
-            cropper = null;
-        }
-        
-        // Hide crop container and show fabric canvas
-        cropContainer.style.display = 'none';
-        editorCanvas.style.display = 'block';
-        isCropMode = false;
-        
-        fabric.Image.fromURL(originalImageData, function(img) {
-            fabricCanvas.clear();
-            
-            const canvasWidth = fabricCanvas.getWidth();
-            const canvasHeight = fabricCanvas.getHeight();
-            const scaleX = canvasWidth / img.width;
-            const scaleY = canvasHeight / img.height;
-            const scale = Math.min(scaleX, scaleY) * 0.8;
-            
-            img.scale(scale);
-            img.set({
-                left: (canvasWidth - img.width * scale) / 2,
-                top: (canvasHeight - img.height * scale) / 2
-            });
-            
-            fabricCanvas.add(img);
-            fabricCanvas.setActiveObject(img);
-            fabricCanvas.renderAll();
-            
-            resetControls();
-        });
-        
-        // Reset the image data to original
-        selectedImages[currentEditingIndex].dataUrl = originalImageData;
+    if (currentEditingIndex >= 0 && originalImageData) {
+        images[currentEditingIndex].dataUrl = originalImageData;
+        initializeFabricCanvas(originalImageData);
+        resetControls();
     }
 }
 
 // Save edits
 function saveEdits() {
-    if (currentEditingIndex >= 0) {
-        let dataUrl;
-        
-        if (isCropMode && cropper) {
-            // Get cropped data if in crop mode
-            cropper.getCroppedCanvas({
-                width: 800,
-                height: 600,
-                imageSmoothingEnabled: true,
-                imageSmoothingQuality: 'high'
-            }).then(function(canvas) {
-                dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-                selectedImages[currentEditingIndex].dataUrl = dataUrl;
-                updateUI();
-                closeEditor();
-                showNotification('Image edited successfully!', 'success');
-            });
-        } else {
-            // Get fabric canvas data
-            dataUrl = fabricCanvas.toDataURL({
-                format: 'jpeg',
-                quality: 0.9
-            });
-            
-            selectedImages[currentEditingIndex].dataUrl = dataUrl;
-            updateUI();
-            closeEditor();
-            showNotification('Image edited successfully!', 'success');
-        }
+    if (!fabricCanvas || fabricCanvas.getObjects().length === 0) return;
+    
+    const canvas = fabricCanvas.getElement();
+    const dataUrl = canvas.toDataURL('image/png');
+    
+    // Update the image data
+    images[currentEditingIndex].dataUrl = dataUrl;
+    
+    // Update display
+    updateImageDisplay();
+    
+    // Close editor
+    closeEditor();
+}
+
+// Close editor
+function closeEditor() {
+    const modal = document.getElementById('editorModal');
+    modal.style.display = 'none';
+    
+    // Clean up
+    if (fabricCanvas) {
+        fabricCanvas.dispose();
+        fabricCanvas = null;
     }
-}
-
-// Remove image
-function removeImage(index) {
-    selectedImages.splice(index, 1);
-    updateUI();
-    fileInput.value = '';
-}
-
-// Clear all images
-function clearImages() {
-    selectedImages = [];
-    updateUI();
-    fileInput.value = '';
+    
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+    
+    isCropMode = false;
+    currentEditingIndex = -1;
+    originalImageData = null;
 }
 
 // Generate PDF
-async function generatePDF() {
-    if (selectedImages.length === 0) {
-        alert('Please select at least one image.');
+function generatePDF() {
+    if (images.length === 0) {
+        alert('Please add at least one image to generate PDF.');
         return;
     }
     
-    // Show loading state
-    generateBtn.classList.add('loading');
-    generateBtn.disabled = true;
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'flex';
     
-    try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+    // Create PDF document
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    
+    let currentPage = 1;
+    const maxImagesPerPage = 1; // One image per page for better quality
+    
+    for (let i = 0; i < images.length; i++) {
+        const image = images[i];
         
-        // Set initial position
-        let yPosition = 20;
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 20;
-        const maxWidth = pageWidth - (2 * margin);
-        const maxHeight = pageHeight - (2 * margin);
-        
-        for (let i = 0; i < selectedImages.length; i++) {
-            const image = selectedImages[i];
-            
-            // Create a new page for each image (except the first one)
-            if (i > 0) {
-                doc.addPage();
-                yPosition = 20;
-            }
-            
-            // Load image
-            const img = new Image();
-            img.src = image.dataUrl;
-            
-            await new Promise((resolve) => {
-                img.onload = function() {
-                    // Calculate dimensions to fit the page
-                    let imgWidth = img.width;
-                    let imgHeight = img.height;
-                    
-                    // Scale down if image is too large
-                    if (imgWidth > maxWidth || imgHeight > maxHeight) {
-                        const scaleX = maxWidth / imgWidth;
-                        const scaleY = maxHeight / imgHeight;
-                        const scale = Math.min(scaleX, scaleY);
-                        
-                        imgWidth *= scale;
-                        imgHeight *= scale;
-                    }
-                    
-                    // Center the image horizontally
-                    const xPosition = (pageWidth - imgWidth) / 2;
-                    
-                    // Add image to PDF
-                    doc.addImage(image.dataUrl, 'JPEG', xPosition, yPosition, imgWidth, imgHeight);
-                    
-                    // Add image name below the image
-                    const textY = yPosition + imgHeight + 10;
-                    if (textY < pageHeight - 20) {
-                        doc.setFontSize(12);
-                        doc.setTextColor(100, 100, 100);
-                        doc.text(image.name, margin, textY);
-                    }
-                    
-                    resolve();
-                };
-            });
+        // Add new page for each image (except the first one)
+        if (i > 0) {
+            pdf.addPage();
+            currentPage++;
         }
         
-        // Save the PDF
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        doc.save(`images_${timestamp}.pdf`);
-        
-        // Show success message
-        showNotification('PDF generated successfully!', 'success');
-        
-    } catch (error) {
-        console.error('Error generating PDF:', error);
-        showNotification('Error generating PDF. Please try again.', 'error');
-    } finally {
-        // Hide loading state
-        generateBtn.classList.remove('loading');
-        generateBtn.disabled = false;
-    }
-}
-
-// Show notification
-function showNotification(message, type = 'info') {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    
-    // Style the notification
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 8px;
-        color: white;
-        font-weight: 500;
-        z-index: 1000;
-        animation: slideIn 0.3s ease;
-        max-width: 300px;
-    `;
-    
-    // Set background color based on type
-    if (type === 'success') {
-        notification.style.backgroundColor = '#28a745';
-    } else if (type === 'error') {
-        notification.style.backgroundColor = '#dc3545';
-    } else {
-        notification.style.backgroundColor = '#17a2b8';
-    }
-    
-    // Add to page
-    document.body.appendChild(notification);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
+        // Load image and add to PDF
+        const img = new Image();
+        img.onload = function() {
+            const imgWidth = pdf.internal.pageSize.getWidth();
+            const imgHeight = (img.height * imgWidth) / img.width;
+            
+            // Check if image fits on page
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            if (imgHeight > pageHeight) {
+                // Scale down to fit
+                const scale = pageHeight / imgHeight;
+                const scaledWidth = imgWidth * scale;
+                const scaledHeight = imgHeight * scale;
+                
+                pdf.addImage(image.dataUrl, 'JPEG', (imgWidth - scaledWidth) / 2, 0, scaledWidth, scaledHeight);
+            } else {
+                // Center image on page
+                const yOffset = (pageHeight - imgHeight) / 2;
+                pdf.addImage(image.dataUrl, 'JPEG', 0, yOffset, imgWidth, imgHeight);
             }
-        }, 300);
-    }, 3000);
+            
+            // If this is the last image, save the PDF
+            if (i === images.length - 1) {
+                setTimeout(() => {
+                    pdf.save('images-to-pdf.pdf');
+                    loadingOverlay.style.display = 'none';
+                }, 100);
+            }
+        };
+        
+        img.src = image.dataUrl;
+    }
 }
 
-// Add slideOut animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(style); 
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
