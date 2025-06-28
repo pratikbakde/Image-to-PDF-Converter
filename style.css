@@ -9,6 +9,8 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     color: #333;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
@@ -57,6 +59,7 @@ main {
     background: #f8f9ff;
     transition: all 0.3s ease;
     cursor: pointer;
+    touch-action: manipulation;
 }
 
 .upload-area:hover {
@@ -85,6 +88,47 @@ main {
 .upload-content p {
     color: #666;
     margin-bottom: 20px;
+}
+
+/* Upload Options */
+.upload-options {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.camera-btn, .media-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 25px;
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    background: white;
+    color: #667eea;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+    touch-action: manipulation;
+}
+
+.camera-btn:hover, .media-btn:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.btn-icon {
+    font-size: 1.5rem;
+}
+
+.btn-text {
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .browse-btn {
@@ -152,6 +196,7 @@ main {
     cursor: pointer;
     font-size: 14px;
     transition: background 0.3s ease;
+    touch-action: manipulation;
 }
 
 .image-item .remove-btn:hover {
@@ -171,6 +216,7 @@ main {
     cursor: pointer;
     font-size: 14px;
     transition: background 0.3s ease;
+    touch-action: manipulation;
 }
 
 .image-item .edit-btn:hover {
@@ -201,10 +247,14 @@ main {
     border: none;
     border-radius: 25px;
     font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
+    touch-action: manipulation;
+    min-height: 44px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
 }
 
@@ -220,13 +270,13 @@ main {
 
 .btn-secondary {
     background: #f8f9fa;
-    color: #666;
+    color: #6c757d;
     border: 2px solid #dee2e6;
 }
 
 .btn-secondary:hover {
     background: #e9ecef;
-    transform: translateY(-2px);
+    border-color: #adb5bd;
 }
 
 .btn:disabled {
@@ -235,15 +285,66 @@ main {
     transform: none !important;
 }
 
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(5px);
+}
+
+.loading-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-content h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+}
+
+.loading-content p {
+    color: #666;
+    font-size: 1rem;
+}
+
 /* Features */
 .features {
     margin-top: 40px;
 }
 
 .features h3 {
-    text-align: center;
     font-size: 1.5rem;
     margin-bottom: 30px;
+    text-align: center;
     color: #333;
 }
 
@@ -256,8 +357,8 @@ main {
 .feature {
     text-align: center;
     padding: 30px 20px;
-    background: #f8f9ff;
     border-radius: 15px;
+    background: #f8f9ff;
     transition: transform 0.3s ease;
 }
 
@@ -267,12 +368,12 @@ main {
 
 .feature-icon {
     font-size: 3rem;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .feature h4 {
     font-size: 1.2rem;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     color: #333;
 }
 
@@ -286,9 +387,10 @@ footer {
     text-align: center;
     color: white;
     opacity: 0.8;
+    margin-top: 20px;
 }
 
-/* Loading Animation */
+/* Button Loading State */
 .btn-loading {
     display: none;
 }
@@ -301,7 +403,7 @@ footer {
     display: inline;
 }
 
-/* Modal Styles */
+/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -310,20 +412,19 @@ footer {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.8);
-    animation: fadeIn 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
 }
 
 .modal-content {
     background-color: white;
-    margin: 2% auto;
-    padding: 0;
-    border-radius: 15px;
+    margin: 5% auto;
+    border-radius: 20px;
     width: 90%;
-    max-width: 1200px;
+    max-width: 1000px;
     max-height: 90vh;
-    overflow: hidden;
-    animation: slideIn 0.3s ease;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .modal-header {
@@ -331,99 +432,90 @@ footer {
     justify-content: space-between;
     align-items: center;
     padding: 20px 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    border-bottom: 1px solid #eee;
 }
 
 .modal-header h3 {
-    margin: 0;
     font-size: 1.5rem;
+    color: #333;
 }
 
 .close-btn {
     background: none;
     border: none;
-    color: white;
     font-size: 2rem;
     cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
+    color: #999;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
 }
 
 .close-btn:hover {
-    background: rgba(255,255,255,0.2);
+    background: #f8f9fa;
+    color: #333;
 }
 
 .modal-body {
     padding: 30px;
-    max-height: calc(90vh - 100px);
-    overflow-y: auto;
 }
 
 .editor-container {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 300px;
     gap: 30px;
-    height: 600px;
 }
 
 .canvas-container {
     background: #f8f9fa;
     border-radius: 10px;
+    padding: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    position: relative;
+    min-height: 400px;
 }
 
 #cropContainer {
     width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f8f9fa;
-    border-radius: 10px;
-    overflow: hidden;
+    max-width: 100%;
+    position: relative;
 }
 
 #cropImage {
     max-width: 100%;
-    max-height: 100%;
+    height: auto;
     display: block;
 }
 
 #editorCanvas {
     max-width: 100%;
-    max-height: 100%;
-    border-radius: 8px;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
 }
 
 .editor-controls {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    overflow-y: auto;
+    gap: 25px;
 }
 
 .control-group {
-    background: #f8f9ff;
+    background: #f8f9fa;
     padding: 20px;
     border-radius: 10px;
-    border: 1px solid #e9ecef;
 }
 
 .control-group h4 {
+    font-size: 1.1rem;
     margin-bottom: 15px;
     color: #333;
-    font-size: 1.1rem;
 }
 
 .control-item {
@@ -436,6 +528,7 @@ footer {
 .control-item label {
     font-weight: 500;
     color: #555;
+    font-size: 0.9rem;
 }
 
 .control-item input[type="range"] {
@@ -445,6 +538,7 @@ footer {
     background: #ddd;
     outline: none;
     -webkit-appearance: none;
+    appearance: none;
 }
 
 .control-item input[type="range"]::-webkit-slider-thumb {
@@ -455,6 +549,7 @@ footer {
     border-radius: 50%;
     background: #667eea;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .control-item input[type="range"]::-moz-range-thumb {
@@ -464,68 +559,66 @@ footer {
     background: #667eea;
     cursor: pointer;
     border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .control-item select {
-    width: 100%;
     padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 5px;
     background: white;
     font-size: 0.9rem;
-    cursor: pointer;
+    outline: none;
 }
 
 .control-item select:focus {
-    outline: none;
     border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
 .control-item button {
-    padding: 8px 12px;
+    padding: 8px 16px;
     border: 1px solid #ddd;
-    background: white;
     border-radius: 5px;
+    background: white;
     cursor: pointer;
     font-size: 0.9rem;
     transition: all 0.3s ease;
-    margin-right: 5px;
-    margin-bottom: 5px;
+    touch-action: manipulation;
 }
 
 .control-item button:hover {
-    background: #667eea;
-    color: white;
+    background: #f8f9fa;
     border-color: #667eea;
 }
 
 .control-item span {
     font-size: 0.9rem;
     color: #666;
-    min-width: 30px;
-    text-align: right;
+    text-align: center;
+    min-width: 40px;
 }
 
-/* Crop-specific styles */
+/* Cropper Styles */
 .cropper-container {
-    background: #f8f9fa !important;
+    max-width: 100%;
 }
 
 .cropper-view-box {
-    border-radius: 0 !important;
+    border-radius: 5px;
 }
 
 .cropper-face {
-    background-color: rgba(0, 0, 0, 0.1) !important;
+    background-color: rgba(102, 126, 234, 0.1);
 }
 
 .cropper-line {
-    background-color: #667eea !important;
+    background-color: #667eea;
 }
 
 .cropper-point {
-    background-color: #667eea !important;
-    border: 2px solid white !important;
+    background-color: #667eea;
+    border: 2px solid white;
 }
 
 /* Animations */
@@ -535,14 +628,14 @@ footer {
 }
 
 @keyframes slideIn {
-    from { transform: translateY(-50px); opacity: 0; }
+    from { transform: translateY(-20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(30px);
     }
     to {
         opacity: 1;
@@ -551,17 +644,18 @@ footer {
 }
 
 .image-item {
-    animation: fadeInUp 0.5s ease;
+    animation: fadeInUp 0.5s ease-out;
 }
 
-/* Responsive Design */
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
     .container {
-        padding: 10px;
+        padding: 15px;
     }
     
     main {
-        padding: 20px;
+        padding: 25px;
+        border-radius: 15px;
     }
     
     header h1 {
@@ -569,7 +663,7 @@ footer {
     }
     
     .upload-area {
-        padding: 40px 20px;
+        padding: 40px 15px;
     }
     
     .images-grid {
@@ -585,7 +679,8 @@ footer {
     .btn {
         width: 100%;
         max-width: 300px;
-        justify-content: center;
+        min-height: 50px;
+        font-size: 1.1rem;
     }
     
     .features-grid {
@@ -595,12 +690,13 @@ footer {
     
     .editor-container {
         grid-template-columns: 1fr;
-        height: auto;
+        gap: 20px;
     }
     
     .modal-content {
+        margin: 10% auto;
         width: 95%;
-        margin: 5% auto;
+        max-height: 85vh;
     }
     
     .modal-body {
@@ -608,7 +704,18 @@ footer {
     }
     
     .canvas-container {
-        height: 400px;
+        min-height: 300px;
+    }
+    
+    .upload-options {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .camera-btn, .media-btn {
+        width: 100%;
+        max-width: 200px;
+        min-height: 60px;
     }
 }
 
@@ -622,19 +729,176 @@ footer {
     }
     
     .upload-content h3 {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
     }
     
     .images-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
     }
     
     .control-item button {
-        font-size: 0.8rem;
-        padding: 6px 10px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        min-height: 44px;
     }
     
     .canvas-container {
-        height: 300px;
+        min-height: 250px;
+        padding: 15px;
+    }
+    
+    .modal-content {
+        margin: 5% auto;
+        width: 98%;
+        max-height: 90vh;
+    }
+    
+    .modal-header {
+        padding: 15px 20px;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .control-group {
+        padding: 15px;
+    }
+    
+    .loading-content {
+        padding: 30px 20px;
+    }
+}
+
+/* Camera Dialog */
+.camera-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.camera-dialog-content {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    animation: slideIn 0.3s ease;
+}
+
+.camera-dialog-content h4 {
+    font-size: 1.3rem;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+.camera-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.camera-option {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    font-weight: 500;
+    touch-action: manipulation;
+}
+
+.camera-option:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
+}
+
+.camera-icon {
+    font-size: 1.5rem;
+    min-width: 30px;
+}
+
+.camera-cancel {
+    padding: 12px 25px;
+    border: 2px solid #e9ecef;
+    border-radius: 25px;
+    background: white;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    font-weight: 500;
+    touch-action: manipulation;
+}
+
+.camera-cancel:hover {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: #fff5f5;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .camera-dialog-content {
+        padding: 25px 20px;
+        margin: 20px;
+    }
+    
+    .camera-option {
+        padding: 18px 20px;
+        font-size: 1.1rem;
+        min-height: 60px;
+    }
+    
+    .camera-cancel {
+        padding: 15px 30px;
+        font-size: 1.1rem;
+        min-height: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .camera-dialog-content {
+        padding: 20px 15px;
+        margin: 15px;
+    }
+    
+    .camera-dialog-content h4 {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+    }
+    
+    .camera-options {
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .camera-option {
+        padding: 16px 18px;
+        font-size: 1rem;
+    }
+    
+    .camera-icon {
+        font-size: 1.3rem;
     }
 }
