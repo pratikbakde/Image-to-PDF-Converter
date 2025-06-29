@@ -40,31 +40,7 @@
                             </button>
                         </div>
                         
-                        <!-- Camera Selection Dialog -->
-                        <div id="cameraDialog" class="camera-dialog" style="display: none;">
-                            <div class="camera-dialog-content">
-                                <h4>Choose Camera</h4>
-                                <div class="camera-options">
-                                    <button type="button" class="camera-option" onclick="selectCamera('back')">
-                                        <span class="camera-icon">📷</span>
-                                        <span>Back Camera</span>
-                                    </button>
-                                    <button type="button" class="camera-option" onclick="selectCamera('front')">
-                                        <span class="camera-icon">📱</span>
-                                        <span>Front Camera</span>
-                                    </button>
-                                    <button type="button" class="camera-option" onclick="selectCamera('any')">
-                                        <span class="camera-icon">🎯</span>
-                                        <span>Any Camera</span>
-                                    </button>
-                                </div>
-                                <button type="button" class="camera-cancel" onclick="closeCameraDialog()">Cancel</button>
-                            </div>
-                        </div>
-                        
-                        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
-                        <input type="file" id="frontCameraInput" accept="image/*" capture="user" style="display:none">
-                        <input type="file" id="anyCameraInput" accept="image/*" style="display:none">
+                        <input type="file" id="cameraInput" accept="image/*" capture style="display:none">
                         <input type="file" id="mediaInput" accept="image/*" multiple style="display:none">
                     </div>
                 </div>
@@ -120,8 +96,10 @@
                             <h4>Transform</h4>
                             <div class="control-item">
                                 <label>Rotate:</label>
-                                <button onclick="rotateImage(-90)">↶ Left</button>
-                                <button onclick="rotateImage(90)">↷ Right</button>
+                                <div class="button-group">
+                                    <button onclick="rotateImage(-90)">↶ Left</button>
+                                    <button onclick="rotateImage(90)">↷ Right</button>
+                                </div>
                             </div>
                         </div>
                         
@@ -137,11 +115,40 @@
                         <div class="control-group">
                             <h4>Crop Tool</h4>
                             <div class="control-item">
-                                <button onclick="enableAdvancedCrop()" class="btn btn-secondary">Enable Crop</button>
-                                <button onclick="resetCrop()" class="btn btn-secondary">Reset Crop</button>
+                                <div class="button-group">
+                                    <button onclick="enableAdvancedCrop()" class="btn btn-secondary">Enable Crop</button>
+                                    <button onclick="resetCrop()" class="btn btn-secondary">Reset Crop</button>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Camera Modal -->
+    <div id="cameraModal" class="modal">
+        <div class="modal-content camera-modal">
+            <div class="modal-header">
+                <h3>Take Photo</h3>
+                <div class="modal-actions">
+                    <button class="capture-btn" onclick="capturePhoto()">📸 Capture</button>
+                    <button class="close-btn" onclick="closeCameraModal()">×</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="camera-container">
+                    <video id="cameraVideo" autoplay playsinline></video>
+                    <canvas id="cameraCanvas" style="display: none;"></canvas>
+                    <div class="camera-overlay">
+                        <div class="camera-frame"></div>
+                    </div>
+                </div>
+                <div class="camera-controls">
+                    <button class="btn btn-secondary" onclick="switchCamera()">🔄 Switch Camera</button>
+                    <button class="btn btn-secondary" onclick="retakePhoto()" id="retakeBtn" style="display: none;">🔄 Retake</button>
+                    <button class="btn btn-primary" onclick="usePhoto()" id="usePhotoBtn" style="display: none;">✅ Use Photo</button>
                 </div>
             </div>
         </div>
