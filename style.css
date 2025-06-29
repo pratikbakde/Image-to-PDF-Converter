@@ -178,6 +178,7 @@ main {
     box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     transition: transform 0.3s ease;
     background: white;
+    cursor: pointer;
 }
 
 .image-item:hover {
@@ -189,16 +190,42 @@ main {
     height: 120px;
     object-fit: cover;
     cursor: pointer;
+    pointer-events: none; /* Prevent image click events */
 }
 
 .image-item .remove-btn {
     position: absolute;
     top: 5px;
     right: 5px;
-    width: 25px;
-    height: 25px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: rgba(220, 53, 69, 0.9);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+    touch-action: manipulation;
+}
+
+.image-item .remove-btn:hover {
+    background: rgba(220, 53, 69, 1);
+    transform: scale(1.1);
+}
+
+.image-item .edit-btn {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(0, 123, 255, 0.9);
     color: white;
     border: none;
     cursor: pointer;
@@ -207,36 +234,34 @@ main {
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    touch-action: manipulation;
-}
-
-.image-item .remove-btn:hover {
-    background: #dc3545;
-    transform: scale(1.1);
-}
-
-.image-item .edit-btn {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: rgba(40, 167, 69, 0.9);
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
+    z-index: 10;
     touch-action: manipulation;
 }
 
 .image-item .edit-btn:hover {
-    background: #28a745;
+    background: rgba(0, 123, 255, 1);
     transform: scale(1.1);
+}
+
+/* Add edit overlay for better mobile experience */
+.image-item::after {
+    content: "Edit";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px;
+    font-size: 12px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.image-item:hover::after {
+    opacity: 1;
 }
 
 .image-item .image-name {
@@ -245,7 +270,6 @@ main {
     color: #333;
     background: white;
     border-top: 1px solid #eee;
-    word-break: break-word;
 }
 
 .image-item .image-size {
@@ -667,17 +691,20 @@ footer {
 .camera-container {
     position: relative;
     width: 100%;
-    height: 350px;
+    height: 60vh;
+    max-height: 500px;
     background: #000;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
     margin-bottom: 15px;
+    aspect-ratio: 4/3;
 }
 
 #cameraVideo {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 12px;
     background: #000;
 }
 
@@ -685,46 +712,54 @@ footer {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 12px;
+    background: #000;
 }
 
 .camera-overlay {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    right: 0;
+    bottom: 0;
     pointer-events: none;
+    border-radius: 12px;
 }
 
 .camera-controls {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     justify-content: center;
     flex-wrap: wrap;
+    padding: 15px 0;
 }
 
 .capture-btn {
-    padding: 12px 24px;
     background: #007bff;
     color: white;
     border: none;
-    border-radius: 8px;
+    padding: 12px 24px;
+    border-radius: 25px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 16px;
     font-weight: 500;
     transition: all 0.3s ease;
-    touch-action: manipulation;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     min-height: 44px;
+    touch-action: manipulation;
 }
 
 .capture-btn:hover {
     background: #0056b3;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
 }
 
 .capture-btn:active {
     transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
 }
 
 /* Animations */
@@ -772,20 +807,20 @@ footer {
     
     main {
         padding: 20px;
-        border-radius: 12px;
+        border-radius: 10px;
     }
     
     header h1 {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
     }
     
     .upload-area {
-        padding: 30px 15px;
+        padding: 30px 10px;
     }
     
     .images-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 12px;
+        gap: 10px;
     }
     
     .actions {
@@ -794,29 +829,27 @@ footer {
     }
     
     .btn {
-        width: 100%;
-        padding: 14px 20px;
-        font-size: 1rem;
-        min-height: 50px;
+        padding: 12px 20px;
+        font-size: 14px;
+        min-height: 44px; /* Minimum touch target size */
     }
     
     .editor-container {
-        grid-template-columns: 1fr;
-        gap: 15px;
+        flex-direction: column;
     }
     
     .modal-content {
-        width: 98%;
-        max-width: none;
-        margin: 10px auto;
+        width: 95%;
+        max-height: 90vh;
+        margin: 5vh auto;
     }
     
     .modal-body {
-        padding: 15px;
+        max-height: 70vh;
     }
     
     .canvas-container {
-        min-height: 300px;
+        max-height: 50vh;
     }
     
     .upload-options {
@@ -825,43 +858,70 @@ footer {
     }
     
     .camera-btn, .media-btn {
-        min-width: 140px;
-        padding: 14px 40px;
+        padding: 15px 20px;
         min-height: 50px;
+        font-size: 16px;
     }
     
     .modal-actions {
+        flex-direction: column;
         gap: 8px;
     }
     
     .save-btn {
-        padding: 8px 12px;
-        font-size: 0.8rem;
+        padding: 12px 20px;
+        font-size: 14px;
     }
     
     .camera-modal {
-        width: 98%;
-        margin: 10px auto;
+        width: 95%;
+        max-width: 500px;
     }
     
     .camera-container {
-        height: 250px;
+        max-height: 60vh;
     }
     
     .camera-controls {
         flex-direction: column;
-        align-items: center;
+        gap: 10px;
     }
     
     .camera-controls .btn {
-        width: 100%;
-        max-width: 200px;
+        padding: 12px 20px;
+        font-size: 14px;
+        min-height: 44px;
+    }
+    
+    /* Make edit buttons more visible on mobile */
+    .image-item .edit-btn,
+    .image-item .remove-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+        opacity: 0.9;
+    }
+    
+    /* Show edit overlay on mobile */
+    .image-item::after {
+        opacity: 0.8;
+        font-size: 11px;
+        padding: 6px;
+    }
+    
+    /* Improve touch targets */
+    .image-item {
+        min-height: 140px;
+    }
+    
+    .image-item img {
+        height: 100px;
     }
 }
 
 @media (max-width: 480px) {
     header h1 {
-        font-size: 1.6rem;
+        font-size: 1.3rem;
     }
     
     .upload-icon {
@@ -874,38 +934,153 @@ footer {
     
     .images-grid {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 10px;
+        gap: 8px;
     }
     
     .control-item button {
-        padding: 10px 12px;
-        font-size: 0.8rem;
-        min-height: 44px;
+        padding: 8px 12px;
+        font-size: 12px;
     }
     
     .canvas-container {
-        min-height: 250px;
+        max-height: 40vh;
     }
     
     .modal-content {
-        width: 100%;
-        margin: 5px;
-        border-radius: 10px;
+        width: 98%;
+        margin: 2vh auto;
     }
     
     .modal-header {
-        padding: 12px 15px;
+        padding: 10px 15px;
     }
     
     .modal-body {
-        padding: 12px;
+        padding: 10px;
     }
     
     .control-group {
-        padding: 12px;
+        margin-bottom: 15px;
     }
     
     .loading-content {
-        padding: 25px 15px;
+        padding: 20px;
+    }
+    
+    /* Ensure edit buttons are always visible on small screens */
+    .image-item .edit-btn,
+    .image-item .remove-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    .image-item .edit-btn:hover,
+    .image-item .remove-btn:hover {
+        background: rgba(0, 0, 0, 1);
+        transform: scale(1.05);
+    }
+    
+    /* Make image items more compact */
+    .image-item {
+        min-height: 120px;
+    }
+    
+    .image-item img {
+        height: 80px;
+    }
+    
+    .image-item .image-name {
+        padding: 6px;
+        font-size: 0.7rem;
+    }
+    
+    .image-item .image-size {
+        padding: 0 6px 6px;
+        font-size: 0.6rem;
+    }
+    
+    /* Improve camera modal on small screens */
+    .camera-modal {
+        width: 98%;
+        margin: 1vh auto;
+    }
+    
+    .camera-container {
+        height: auto;
+        max-height: 60vh;
+        aspect-ratio: 4/3;
+    }
+    
+    .camera-controls {
+        padding: 10px 0;
+    }
+    
+    .camera-controls .btn {
+        padding: 10px 16px;
+        font-size: 13px;
+        min-height: 40px;
+    }
+    
+    .capture-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+        min-height: 40px;
+    }
+}
+
+/* Add touch feedback for mobile devices */
+@media (hover: none) and (pointer: coarse) {
+    .image-item .edit-btn,
+    .image-item .remove-btn {
+        opacity: 0.9;
+        transition: all 0.2s ease;
+    }
+    
+    .image-item .edit-btn:active,
+    .image-item .remove-btn:active {
+        transform: scale(0.95);
+        opacity: 1;
+    }
+    
+    .image-item:active {
+        transform: scale(0.98);
+    }
+    
+    /* Show edit overlay on touch devices */
+    .image-item::after {
+        opacity: 0.7;
+    }
+}
+
+/* Improve button accessibility on mobile */
+.btn, .camera-btn, .media-btn, .capture-btn {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+/* Add visual feedback for touch interactions */
+.btn:active, .camera-btn:active, .media-btn:active, .capture-btn:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+}
+
+/* Ensure proper spacing for touch targets */
+.images-grid {
+    gap: 12px;
+}
+
+@media (max-width: 768px) {
+    .images-grid {
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .images-grid {
+        gap: 8px;
     }
 } 
