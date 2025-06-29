@@ -6,6 +6,10 @@ let cropper = null;
 let isCropMode = false;
 let originalImageData = null;
 
+// Camera modal functionality
+let cameraStream = null;
+let facingMode = 'environment'; // Start with back camera
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -54,10 +58,9 @@ function setupEventListeners() {
             closeEditor();
         }
         
-        // Close camera dialog when clicking outside
-        const cameraDialog = document.getElementById('cameraDialog');
-        if (e.target === cameraDialog) {
-            closeCameraDialog();
+        const cameraModal = document.getElementById('cameraModal');
+        if (e.target === cameraModal) {
+            closeCameraModal();
         }
     });
     
@@ -65,7 +68,7 @@ function setupEventListeners() {
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeEditor();
-            closeCameraDialog();
+            closeCameraModal();
         }
     });
 }
@@ -74,134 +77,26 @@ function setupEventListeners() {
 function setupCameraAndMedia() {
     const cameraBtn = document.getElementById('cameraBtn');
     const mediaBtn = document.getElementById('mediaBtn');
-    const cameraInput = document.getElementById('cameraInput');
-    const frontCameraInput = document.getElementById('frontCameraInput');
-    const anyCameraInput = document.getElementById('anyCameraInput');
     const mediaInput = document.getElementById('mediaInput');
     
     // Camera button click handler
     cameraBtn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        openCamera();
+        openCameraModal();
     });
     
     // Media button click handler
     mediaBtn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        openMedia();
-    });
-    
-    // Camera input change handlers
-    cameraInput.addEventListener('change', function(event) {
-        handleCameraSelect(event);
-    });
-    
-    frontCameraInput.addEventListener('change', function(event) {
-        handleCameraSelect(event);
-    });
-    
-    anyCameraInput.addEventListener('change', function(event) {
-        handleCameraSelect(event);
+        mediaInput.click();
     });
     
     // Media input change handler
     mediaInput.addEventListener('change', function(event) {
         handleFileSelect(event);
     });
-}
-
-// Camera functionality
-function openCamera() {
-    console.log('Opening camera...');
-    
-    // Check if we're on a mobile device
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-        // On mobile, show camera selection dialog
-        showCameraDialog();
-    } else {
-        // On desktop, try to access camera via getUserMedia first
-        tryDesktopCamera();
-    }
-}
-
-function showCameraDialog() {
-    const cameraDialog = document.getElementById('cameraDialog');
-    cameraDialog.style.display = 'flex';
-}
-
-function closeCameraDialog() {
-    const cameraDialog = document.getElementById('cameraDialog');
-    cameraDialog.style.display = 'none';
-}
-
-function selectCamera(type) {
-    closeCameraDialog();
-    
-    switch(type) {
-        case 'back':
-            const cameraInput = document.getElementById('cameraInput');
-            cameraInput.click();
-            break;
-        case 'front':
-            const frontCameraInput = document.getElementById('frontCameraInput');
-            frontCameraInput.click();
-            break;
-        case 'any':
-            const anyCameraInput = document.getElementById('anyCameraInput');
-            anyCameraInput.click();
-            break;
-    }
-}
-
-function tryCameraOptions() {
-    // Try back camera first (most common use case)
-    const cameraInput = document.getElementById('cameraInput');
-    
-    // Check if the input is supported
-    if (cameraInput && cameraInput.capture) {
-        cameraInput.click();
-    } else {
-        // Fallback to any camera
-        const anyCameraInput = document.getElementById('anyCameraInput');
-        anyCameraInput.click();
-    }
-}
-
-function tryDesktopCamera() {
-    // Check if camera is supported
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('Camera is not supported in this browser. Please use a modern browser or try the media option instead.');
-        return;
-    }
-    
-    // Try to access camera first to ensure it's available
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(function(stream) {
-            // Camera is available, trigger file input
-            stream.getTracks().forEach(track => track.stop()); // Stop the stream
-            const anyCameraInput = document.getElementById('anyCameraInput');
-            anyCameraInput.click();
-        })
-        .catch(function(err) {
-            console.log('Camera access denied or not available:', err);
-            // Fallback to file input
-            const anyCameraInput = document.getElementById('anyCameraInput');
-            anyCameraInput.click();
-        });
-}
-
-function handleCameraSelect(event) {
-    console.log('Camera file selected:', event.target.files);
-    const files = Array.from(event.target.files);
-    if (files.length > 0) {
-        addImages(files);
-    }
-    // Reset input for future use
-    event.target.value = '';
 }
 
 // Media functionality
@@ -863,4 +758,159 @@ function formatFileSize(bytes) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Camera modal functionality
+function openCameraModal() {
+    const cameraModal = document.getElementById('cameraModal');
+    cameraModal.style.display = 'flex';
+    
+    // Start camera
+    startCamera();
+}
+
+function closeCameraModal() {
+    const cameraModal = document.getElementById('cameraModal');
+    cameraModal.style.display = 'none';
+    
+    // Stop camera stream
+    stopCamera();
+    
+    // Reset UI
+    resetCameraUI();
+}
+
+function startCamera() {
+    const video = document.getElementById('cameraVideo');
+    
+    // Check if camera is supported
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Camera is not supported in this browser. Please use a modern browser.');
+        return;
+    }
+    
+    // Get camera stream
+    navigator.mediaDevices.getUserMedia({
+        video: {
+            facingMode: facingMode,
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+        }
+    })
+    .then(function(stream) {
+        cameraStream = stream;
+        video.srcObject = stream;
+        video.play();
+    })
+    .catch(function(err) {
+        console.error('Error accessing camera:', err);
+        alert('Unable to access camera. Please check camera permissions and try again.');
+        closeCameraModal();
+    });
+}
+
+function stopCamera() {
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+    }
+}
+
+function switchCamera() {
+    // Toggle between front and back camera
+    facingMode = facingMode === 'environment' ? 'user' : 'environment';
+    
+    // Restart camera with new facing mode
+    stopCamera();
+    startCamera();
+}
+
+function capturePhoto() {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('cameraCanvas');
+    const captureBtn = document.querySelector('.capture-btn');
+    const retakeBtn = document.getElementById('retakeBtn');
+    const usePhotoBtn = document.getElementById('usePhotoBtn');
+    
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Draw video frame to canvas
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Show captured image
+    video.style.display = 'none';
+    canvas.style.display = 'block';
+    
+    // Show retake and use photo buttons
+    captureBtn.style.display = 'none';
+    retakeBtn.style.display = 'inline-block';
+    usePhotoBtn.style.display = 'inline-block';
+}
+
+function retakePhoto() {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('cameraCanvas');
+    const captureBtn = document.querySelector('.capture-btn');
+    const retakeBtn = document.getElementById('retakeBtn');
+    const usePhotoBtn = document.getElementById('usePhotoBtn');
+    
+    // Show video again
+    video.style.display = 'block';
+    canvas.style.display = 'none';
+    
+    // Show capture button, hide retake and use photo buttons
+    captureBtn.style.display = 'inline-block';
+    retakeBtn.style.display = 'none';
+    usePhotoBtn.style.display = 'none';
+}
+
+function usePhoto() {
+    const canvas = document.getElementById('cameraCanvas');
+    
+    // Convert canvas to data URL
+    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    
+    // Create a file-like object
+    const imageData = {
+        id: Date.now() + Math.random(),
+        name: `camera-photo-${Date.now()}.jpg`,
+        size: 0, // Will be calculated
+        type: 'image/jpeg',
+        dataUrl: imageDataUrl,
+        originalDataUrl: imageDataUrl
+    };
+    
+    // Add to images array
+    images.push(imageData);
+    updateImageDisplay();
+    updateImageCount();
+    
+    // Show images section if hidden
+    const imagesSection = document.getElementById('imagesSection');
+    if (imagesSection.style.display === 'none') {
+        imagesSection.style.display = 'block';
+    }
+    
+    // Close camera modal
+    closeCameraModal();
+}
+
+function resetCameraUI() {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('cameraCanvas');
+    const captureBtn = document.querySelector('.capture-btn');
+    const retakeBtn = document.getElementById('retakeBtn');
+    const usePhotoBtn = document.getElementById('usePhotoBtn');
+    
+    // Reset display
+    video.style.display = 'block';
+    canvas.style.display = 'none';
+    
+    // Reset buttons
+    captureBtn.style.display = 'inline-block';
+    retakeBtn.style.display = 'none';
+    usePhotoBtn.style.display = 'none';
 } 
