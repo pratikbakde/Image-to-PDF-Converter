@@ -71,6 +71,14 @@ function setupEventListeners() {
             closeCameraModal();
         }
     });
+    
+    // Add touch event listeners for better mobile experience
+    document.addEventListener('touchstart', function(e) {
+        // Prevent zoom on double tap
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
 }
 
 // Setup camera and media functionality
@@ -156,12 +164,22 @@ function updateImageDisplay() {
         const imageItem = document.createElement('div');
         imageItem.className = 'image-item';
         imageItem.innerHTML = `
-            <img src="${image.dataUrl}" alt="${image.name}" onclick="editImage(${index})">
+            <img src="${image.dataUrl}" alt="${image.name}">
             <button class="edit-btn" onclick="editImage(${index})" title="Edit Image">✏️</button>
             <button class="remove-btn" onclick="removeImage(${index})" title="Remove Image">×</button>
             <div class="image-name">${image.name}</div>
             <div class="image-size">${formatFileSize(image.size)}</div>
         `;
+        
+        // Add click event to the entire image item for better mobile experience
+        imageItem.addEventListener('click', function(e) {
+            // Don't trigger if clicking on buttons
+            if (e.target.classList.contains('edit-btn') || e.target.classList.contains('remove-btn')) {
+                return;
+            }
+            editImage(index);
+        });
+        
         imagesGrid.appendChild(imageItem);
     });
 }
@@ -789,23 +807,72 @@ function startCamera() {
         return;
     }
     
-    // Get camera stream
-    navigator.mediaDevices.getUserMedia({
+    // Get camera stream with 4:3 aspect ratio
+    const constraints = {
         video: {
             facingMode: facingMode,
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+            width: { ideal: 1280, min: 640 },
+            height: { ideal: 960, min: 480 },
+            aspectRatio: { ideal: 1.333333 }, // 4:3 aspect ratio
+            frameRate: { ideal: 30, min: 15 }
         }
-    })
+    };
+    
+    navigator.mediaDevices.getUserMedia(constraints)
     .then(function(stream) {
         cameraStream = stream;
         video.srcObject = stream;
-        video.play();
+        
+        // Set video properties for better mobile experience
+        video.setAttribute('playsinline', true);
+        video.setAttribute('webkit-playsinline', true);
+        video.setAttribute('autoplay', true);
+        video.setAttribute('muted', true);
+        
+        // Wait for video to be ready
+        video.onloadedmetadata = function() {
+            video.play().catch(function(err) {
+                console.error('Error playing video:', err);
+            });
+        };
     })
     .catch(function(err) {
         console.error('Error accessing camera:', err);
-        alert('Unable to access camera. Please check camera permissions and try again.');
-        closeCameraModal();
+        
+        // Try with more basic constraints if the first attempt fails
+        if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
+            console.log('Trying with basic camera constraints...');
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: facingMode,
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    aspectRatio: { ideal: 1.333333 } // 4:3 aspect ratio
+                }
+            })
+            .then(function(stream) {
+                cameraStream = stream;
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true);
+                video.setAttribute('webkit-playsinline', true);
+                video.setAttribute('autoplay', true);
+                video.setAttribute('muted', true);
+                
+                video.onloadedmetadata = function() {
+                    video.play().catch(function(err) {
+                        console.error('Error playing video:', err);
+                    });
+                };
+            })
+            .catch(function(err2) {
+                console.error('Error with basic constraints:', err2);
+                alert('Unable to access camera. Please check camera permissions and try again.');
+                closeCameraModal();
+            });
+        } else {
+            alert('Unable to access camera. Please check camera permissions and try again.');
+            closeCameraModal();
+        }
     });
 }
 
