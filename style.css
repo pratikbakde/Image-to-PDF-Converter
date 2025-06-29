@@ -11,30 +11,31 @@ body {
     color: #333;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    touch-action: manipulation;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 15px;
 }
 
 /* Header */
 header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
     color: black;
 }
 
 header h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
     margin-bottom: 10px;
     text-shadow: none;
     color: black;
 }
 
 header p {
-    font-size: 1.1rem;
+    font-size: 1rem;
     opacity: 0.9;
     color: black;
 }
@@ -42,21 +43,21 @@ header p {
 /* Main Content */
 main {
     background: white;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    margin-bottom: 30px;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
 }
 
 /* Upload Section */
 .upload-section {
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .upload-area {
     border: 1px dashed #667eea;
-    border-radius: 15px;
-    padding: 60px 20px;
+    border-radius: 12px;
+    padding: 40px 15px;
     text-align: center;
     background: white;
     transition: all 0.3s ease;
@@ -77,42 +78,46 @@ main {
 }
 
 .upload-icon {
-    font-size: 3rem;
-    margin-bottom: 20px;
+    font-size: 2.5rem;
+    margin-bottom: 15px;
 }
 
 .upload-content h3 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
+    font-size: 1.3rem;
+    margin-bottom: 8px;
     color: #333;
 }
 
 .upload-content p {
     color: #666;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
 }
 
 /* Upload Options */
 .upload-options {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     justify-content: center;
     flex-wrap: wrap;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 .camera-btn, .media-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 15px 60px;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 60px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-width: 200px;
+    min-width: 160px;
+    min-height: 60px;
     touch-action: manipulation;
+    text-align: center;
 }
 
 .camera-btn {
@@ -124,7 +129,7 @@ main {
 .camera-btn:hover {
     background: #2f4f4f;
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(70, 130, 180, 0.3);
+    box-shadow: 0 6px 12px rgba(70, 130, 180, 0.3);
 }
 
 .media-btn {
@@ -136,7 +141,7 @@ main {
 .media-btn:hover {
     background: #006400;
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(34, 139, 34, 0.3);
+    box-shadow: 0 6px 12px rgba(34, 139, 34, 0.3);
 }
 
 .btn-icon {
@@ -144,131 +149,129 @@ main {
 }
 
 .btn-text {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 500;
-}
-
-.browse-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 25px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.browse-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
 }
 
 /* Images Section */
 .images-section {
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .images-section h3 {
-    font-size: 1.3rem;
-    margin-bottom: 20px;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
     color: #333;
 }
 
 .images-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
 }
 
 .image-item {
     position: relative;
-    border-radius: 10px;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     transition: transform 0.3s ease;
+    background: white;
 }
 
 .image-item:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
 }
 
 .image-item img {
     width: 100%;
-    height: 150px;
+    height: 120px;
     object-fit: cover;
+    cursor: pointer;
 }
 
 .image-item .remove-btn {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(255, 0, 0, 0.8);
+    top: 5px;
+    right: 5px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: rgba(220, 53, 69, 0.9);
     color: white;
     border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
     cursor: pointer;
     font-size: 14px;
-    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
     touch-action: manipulation;
 }
 
 .image-item .remove-btn:hover {
-    background: rgba(255, 0, 0, 1);
+    background: #dc3545;
+    transform: scale(1.1);
 }
 
 .image-item .edit-btn {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(0, 123, 255, 0.8);
+    top: 5px;
+    left: 5px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: rgba(40, 167, 69, 0.9);
     color: white;
     border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
     cursor: pointer;
-    font-size: 14px;
-    transition: background 0.3s ease;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
     touch-action: manipulation;
 }
 
 .image-item .edit-btn:hover {
-    background: rgba(0, 123, 255, 1);
+    background: #28a745;
+    transform: scale(1.1);
 }
 
 .image-item .image-name {
-    padding: 10px;
+    padding: 8px;
+    font-size: 0.8rem;
+    color: #333;
     background: white;
-    font-size: 0.9rem;
-    color: #666;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    border-top: 1px solid #eee;
+    word-break: break-word;
 }
 
-/* Actions */
+.image-item .image-size {
+    padding: 0 8px 8px;
+    font-size: 0.7rem;
+    color: #666;
+    background: white;
+}
+
 .actions {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     justify-content: center;
     flex-wrap: wrap;
 }
 
 .btn {
-    padding: 12px 30px;
+    padding: 12px 24px;
     border: none;
-    border-radius: 25px;
-    font-size: 1rem;
-    font-weight: 500;
+    border-radius: 8px;
     cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
     transition: all 0.3s ease;
-    touch-action: manipulation;
     min-height: 44px;
+    touch-action: manipulation;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -282,18 +285,18 @@ main {
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
 }
 
 .btn-secondary {
     background: #f8f9fa;
-    color: #6c757d;
-    border: 2px solid #dee2e6;
+    color: #333;
+    border: 1px solid #ddd;
 }
 
 .btn-secondary:hover {
     background: #e9ecef;
-    border-color: #adb5bd;
+    border-color: #667eea;
 }
 
 .btn:disabled {
@@ -319,17 +322,17 @@ main {
 
 .loading-content {
     background: white;
-    padding: 40px;
-    border-radius: 20px;
+    padding: 30px;
+    border-radius: 15px;
     text-align: center;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    max-width: 400px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    max-width: 300px;
     width: 90%;
 }
 
 .loading-spinner {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border: 4px solid #f3f3f3;
     border-top: 4px solid #667eea;
     border-radius: 50%;
@@ -343,25 +346,23 @@ main {
 }
 
 .loading-content h3 {
-    color: #333;
+    font-size: 1.2rem;
     margin-bottom: 10px;
-    font-size: 1.3rem;
+    color: #333;
 }
 
 .loading-content p {
     color: #666;
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
-/* Footer */
 footer {
     text-align: center;
-    color: black;
-    opacity: 0.8;
-    margin-top: 20px;
+    padding: 20px;
+    color: #666;
+    font-size: 0.9rem;
 }
 
-/* Button Loading State */
 .btn-loading {
     display: none;
 }
@@ -374,54 +375,87 @@ footer {
     display: inline;
 }
 
-/* Modal */
+/* Modal Styles */
 .modal {
-    display: none;
     position: fixed;
-    z-index: 1000;
-    left: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
     backdrop-filter: blur(5px);
+    padding: 15px;
 }
 
 .modal-content {
-    background-color: white;
-    margin: 5% auto;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 1000px;
+    background: white;
+    border-radius: 15px;
+    max-width: 90%;
     max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease;
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 30px;
+    padding: 15px 20px;
     border-bottom: 1px solid #eee;
     background: #f8f9fa;
-    border-radius: 10px 10px 0 0;
+    border-radius: 15px 15px 0 0;
 }
 
 .modal-header h3 {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     color: #333;
+    margin: 0;
+}
+
+.modal-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.save-btn {
+    padding: 8px 16px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+}
+
+.save-btn:hover {
+    background: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.save-btn:active {
+    transform: translateY(0);
 }
 
 .close-btn {
     background: none;
     border: none;
-    font-size: 2rem;
+    font-size: 1.5rem;
     cursor: pointer;
-    color: #999;
-    width: 40px;
-    height: 40px;
+    color: #666;
+    padding: 5px;
     border-radius: 50%;
+    width: 35px;
+    height: 35px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -435,23 +469,25 @@ footer {
 }
 
 .modal-body {
-    padding: 30px;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(90vh - 80px);
 }
 
 .editor-container {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 20px;
 }
 
 .canvas-container {
     background: #f8f9fa;
     border-radius: 10px;
-    padding: 20px;
+    padding: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 600px;
+    min-height: 400px;
     overflow: hidden;
     order: 1;
 }
@@ -478,24 +514,24 @@ footer {
 .editor-controls {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
     order: 2;
 }
 
 .control-group {
     background: #f8f9fa;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 15px;
+    border-radius: 8px;
 }
 
 .control-group h4 {
-    font-size: 1.1rem;
-    margin-bottom: 15px;
+    font-size: 1rem;
+    margin-bottom: 12px;
     color: #333;
 }
 
 .control-item {
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -561,6 +597,7 @@ footer {
     font-size: 0.9rem;
     transition: all 0.3s ease;
     touch-action: manipulation;
+    min-height: 40px;
 }
 
 .control-item button:hover {
@@ -573,6 +610,30 @@ footer {
     color: #666;
     text-align: center;
     min-width: 40px;
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.button-group button {
+    flex: 1;
+    min-width: 80px;
+}
+
+/* Crop Tool Button Styles */
+.control-group .btn-secondary {
+    color: black !important;
+    background: white;
+    border: 1px solid #ddd;
+}
+
+.control-group .btn-secondary:hover {
+    background: #f8f9fa;
+    border-color: #667eea;
+    color: black !important;
 }
 
 /* Cropper Styles */
@@ -595,6 +656,75 @@ footer {
 .cropper-point {
     background-color: #667eea;
     border: 2px solid white;
+}
+
+/* Camera Modal Styles */
+.camera-modal {
+    max-width: 500px;
+    width: 95%;
+}
+
+.camera-container {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+#cameraVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #000;
+}
+
+#cameraCanvas {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.camera-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.camera-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.capture-btn {
+    padding: 12px 24px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+    min-height: 44px;
+}
+
+.capture-btn:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.capture-btn:active {
+    transform: translateY(0);
 }
 
 /* Animations */
@@ -637,55 +767,56 @@ footer {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .container {
-        padding: 15px;
+        padding: 10px;
     }
     
     main {
-        padding: 25px;
-        border-radius: 15px;
+        padding: 20px;
+        border-radius: 12px;
     }
     
     header h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
     
     .upload-area {
-        padding: 40px 15px;
+        padding: 30px 15px;
     }
     
     .images-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 15px;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
     }
     
     .actions {
         flex-direction: column;
-        gap: 15px;
+        gap: 10px;
     }
     
     .btn {
         width: 100%;
-        padding: 12px 20px;
+        padding: 14px 20px;
         font-size: 1rem;
+        min-height: 50px;
     }
     
     .editor-container {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 15px;
     }
     
     .modal-content {
-        width: 95%;
+        width: 98%;
         max-width: none;
-        margin: 20px auto;
+        margin: 10px auto;
     }
     
     .modal-body {
-        padding: 20px;
+        padding: 15px;
     }
     
     .canvas-container {
-        min-height: 400px;
+        min-height: 300px;
     }
     
     .upload-options {
@@ -694,214 +825,27 @@ footer {
     }
     
     .camera-btn, .media-btn {
-        min-width: 150px;
-        padding: 12px 30px;
+        min-width: 140px;
+        padding: 14px 40px;
+        min-height: 50px;
     }
     
     .modal-actions {
-        gap: 10px;
+        gap: 8px;
     }
     
     .save-btn {
-        padding: 6px 12px;
+        padding: 8px 12px;
         font-size: 0.8rem;
     }
-}
-
-@media (max-width: 480px) {
-    header h1 {
-        font-size: 1.8rem;
-    }
     
-    .upload-icon {
-        font-size: 3rem;
-    }
-    
-    .upload-content h3 {
-        font-size: 1.3rem;
-    }
-    
-    .images-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 10px;
-    }
-    
-    .control-item button {
-        padding: 12px 16px;
-        font-size: 1rem;
-        min-height: 44px;
-    }
-    
-    .canvas-container {
-        min-height: 250px;
-        padding: 15px;
-    }
-    
-    .modal-content {
-        margin: 5% auto;
-        width: 98%;
-        max-height: 90vh;
-    }
-    
-    .modal-header {
-        padding: 15px 20px;
-    }
-    
-    .modal-body {
-        padding: 15px;
-    }
-    
-    .control-group {
-        padding: 15px;
-    }
-    
-    .loading-content {
-        padding: 30px 20px;
-    }
-}
-
-/* Crop Tool Button Styles */
-.control-group .btn-secondary {
-    color: black !important;
-    background: white;
-    border: 1px solid #ddd;
-}
-
-.control-group .btn-secondary:hover {
-    background: #f8f9fa;
-    border-color: #667eea;
-    color: black !important;
-}
-
-.modal-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.save-btn {
-    padding: 8px 16px;
-    background: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    touch-action: manipulation;
-}
-
-.save-btn:hover {
-    background: #218838;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
-}
-
-.save-btn:active {
-    transform: translateY(0);
-}
-
-.button-group {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.button-group button {
-    flex: 1;
-    min-width: 80px;
-}
-
-/* Camera Modal Styles */
-.camera-modal {
-    max-width: 600px;
-    width: 95%;
-}
-
-.camera-container {
-    position: relative;
-    width: 100%;
-    height: 400px;
-    background: #000;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#cameraVideo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    background: #000;
-}
-
-#cameraCanvas {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.camera-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-}
-
-.camera-frame {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-    height: 60%;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    border-radius: 10px;
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
-}
-
-.camera-controls {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.capture-btn {
-    padding: 10px 20px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    touch-action: manipulation;
-}
-
-.capture-btn:hover {
-    background: #0056b3;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
-}
-
-.capture-btn:active {
-    transform: translateY(0);
-}
-
-/* Mobile Responsiveness for Camera */
-@media (max-width: 768px) {
     .camera-modal {
         width: 98%;
         margin: 10px auto;
     }
     
     .camera-container {
-        height: 300px;
+        height: 250px;
     }
     
     .camera-controls {
@@ -912,5 +856,56 @@ footer {
     .camera-controls .btn {
         width: 100%;
         max-width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.6rem;
+    }
+    
+    .upload-icon {
+        font-size: 2rem;
+    }
+    
+    .upload-content h3 {
+        font-size: 1.1rem;
+    }
+    
+    .images-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+    }
+    
+    .control-item button {
+        padding: 10px 12px;
+        font-size: 0.8rem;
+        min-height: 44px;
+    }
+    
+    .canvas-container {
+        min-height: 250px;
+    }
+    
+    .modal-content {
+        width: 100%;
+        margin: 5px;
+        border-radius: 10px;
+    }
+    
+    .modal-header {
+        padding: 12px 15px;
+    }
+    
+    .modal-body {
+        padding: 12px;
+    }
+    
+    .control-group {
+        padding: 12px;
+    }
+    
+    .loading-content {
+        padding: 25px 15px;
     }
 } 
