@@ -336,16 +336,16 @@ function initializeFabricCanvas(imageDataUrl) {
         fabricCanvas.dispose();
     }
     
-    // Create new fabric canvas
+    // Create new fabric canvas with larger size to accommodate rotated images
     fabricCanvas = new fabric.Canvas('editorCanvas', {
-        width: 400,
-        height: 400,
+        width: 600,
+        height: 600,
         backgroundColor: '#f8f9fa'
     });
     
     // Load image
     fabric.Image.fromURL(imageDataUrl, function(img) {
-        // Scale image to fit canvas
+        // Scale image to fit canvas (leaving some margin for rotation)
         const canvasWidth = fabricCanvas.getWidth();
         const canvasHeight = fabricCanvas.getHeight();
         const imgRatio = img.width / img.height;
@@ -353,17 +353,23 @@ function initializeFabricCanvas(imageDataUrl) {
         
         let scaleX, scaleY;
         if (imgRatio > canvasRatio) {
-            scaleX = canvasWidth / img.width;
+            scaleX = (canvasWidth * 0.8) / img.width; // 80% of canvas width
             scaleY = scaleX;
         } else {
-            scaleY = canvasHeight / img.height;
+            scaleY = (canvasHeight * 0.8) / img.height; // 80% of canvas height
             scaleX = scaleY;
         }
         
         img.scaleX = scaleX;
         img.scaleY = scaleY;
-        img.left = (canvasWidth - img.width * scaleX) / 2;
-        img.top = (canvasHeight - img.height * scaleY) / 2;
+        
+        // Center the image and set origin to center for proper rotation
+        img.set({
+            left: canvasWidth / 2,
+            top: canvasHeight / 2,
+            originX: 'center',
+            originY: 'center'
+        });
         
         fabricCanvas.add(img);
         fabricCanvas.renderAll();
@@ -385,11 +391,48 @@ function resetControls() {
 
 // Rotate image
 function rotateImage(angle) {
-    if (!fabricCanvas || fabricCanvas.getObjects().length === 0) return;
+    console.log('Rotate function called with angle:', angle);
     
-    const obj = fabricCanvas.getActiveObject() || fabricCanvas.getObjects()[0];
-    obj.rotate = (obj.rotate || 0) + angle;
-    fabricCanvas.renderAll();
+    if (!fabricCanvas) {
+        console.log('Fabric canvas not initialized');
+        return;
+    }
+    
+    const objects = fabricCanvas.getObjects();
+    if (objects.length === 0) {
+        console.log('No objects in canvas');
+        return;
+    }
+    
+    // Get the image object
+    const obj = objects[0];
+    
+    // Get current rotation and add the new angle
+    const currentRotation = obj.angle || 0;
+    const newRotation = currentRotation + angle;
+    
+    // Set the new rotation
+    obj.set('angle', newRotation);
+    
+    // Get canvas dimensions
+    const canvasWidth = fabricCanvas.getWidth();
+    const canvasHeight = fabricCanvas.getHeight();
+    
+    // Center the object in the canvas
+    obj.set({
+        left: canvasWidth / 2,
+        top: canvasHeight / 2,
+        originX: 'center',
+        originY: 'center'
+    });
+    
+    // Update object coordinates
+    obj.setCoords();
+    
+    // Force canvas to update
+    fabricCanvas.requestRenderAll();
+    
+    console.log('Image rotated by', angle, 'degrees. New rotation:', newRotation);
 }
 
 // Flip image
@@ -607,21 +650,68 @@ function resetImage() {
     }
 }
 
-// Save edits
-function saveEdits() {
-    if (!fabricCanvas || fabricCanvas.getObjects().length === 0) return;
+// Save edited image
+function saveEditedImage() {
+    if (!fabricCanvas || currentEditingIndex < 0) {
+        console.log('No canvas or image to save');
+        return;
+    }
     
-    const canvas = fabricCanvas.getElement();
-    const dataUrl = canvas.toDataURL('image/png');
+    try {
+        // Get the current canvas as a data URL
+        const editedImageDataUrl = fabricCanvas.toDataURL({
+            format: 'png',
+            quality: 1
+        });
+        
+        // Update the image in the images array
+        images[currentEditingIndex].dataUrl = editedImageDataUrl;
+        
+        // Update the display
+        updateImageDisplay();
+        
+        // Show success message
+        showSaveSuccess();
+        
+        // Close the editor
+        closeEditor();
+        
+        console.log('Image saved successfully');
+        
+    } catch (error) {
+        console.error('Error saving image:', error);
+        alert('Error saving image. Please try again.');
+    }
+}
+
+// Show save success message
+function showSaveSuccess() {
+    // Create a temporary success message
+    const successMsg = document.createElement('div');
+    successMsg.className = 'save-success';
+    successMsg.textContent = 'Image saved successfully!';
+    successMsg.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 5px;
+        z-index: 10000;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideInRight 0.3s ease-out;
+    `;
     
-    // Update the image data
-    images[currentEditingIndex].dataUrl = dataUrl;
+    document.body.appendChild(successMsg);
     
-    // Update display
-    updateImageDisplay();
-    
-    // Close editor
-    closeEditor();
+    // Remove the message after 3 seconds
+    setTimeout(() => {
+        if (successMsg.parentNode) {
+            successMsg.parentNode.removeChild(successMsg);
+        }
+    }, 3000);
 }
 
 // Close editor
@@ -773,4 +863,4 @@ function formatFileSize(bytes) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
+} 
