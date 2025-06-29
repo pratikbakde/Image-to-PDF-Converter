@@ -17,8 +17,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>🖼️ Image to PDF Converter</h1>
-            <p>Convert your images to PDF with camera capture and powerful editing tools</p>
+            <h1>Image to PDF Converter</h1>
+            <p></p>
         </header>
 
         <main>
@@ -81,32 +81,6 @@
                     </button>
                 </div>
             </div>
-
-            <div class="features">
-                <h3>Features</h3>
-                <div class="features-grid">
-                    <div class="feature">
-                        <div class="feature-icon">📷</div>
-                        <h4>Camera Capture</h4>
-                        <p>Take photos directly with your device camera</p>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">✏️</div>
-                        <h4>Image Editor</h4>
-                        <p>Rotate, crop, adjust brightness and more</p>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">📱</div>
-                        <h4>Multiple Images</h4>
-                        <p>Upload and convert multiple images at once</p>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">⚡</div>
-                        <h4>Fast Conversion</h4>
-                        <p>Quick PDF generation in your browser</p>
-                    </div>
-                </div>
-            </div>
         </main>
 
         <footer>
@@ -128,7 +102,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Edit Image</h3>
-                <button class="close-btn" onclick="closeEditor()">×</button>
+                <div class="modal-actions">
+                    <button class="save-btn" onclick="saveEditedImage()">Save Changes</button>
+                    <button class="close-btn" onclick="closeEditor()">×</button>
+                </div>
             </div>
             <div class="modal-body">
                 <div class="editor-container">
@@ -143,14 +120,8 @@
                             <h4>Transform</h4>
                             <div class="control-item">
                                 <label>Rotate:</label>
-                                <button onclick="rotateImage(-90)">↶ -90°</button>
-                                <button onclick="rotateImage(90)">↷ +90°</button>
-                                <button onclick="rotateImage(180)">↻ 180°</button>
-                            </div>
-                            <div class="control-item">
-                                <label>Flip:</label>
-                                <button onclick="flipImage('horizontal')">↔ Horizontal</button>
-                                <button onclick="flipImage('vertical')">↕ Vertical</button>
+                                <button onclick="rotateImage(-90)">↶ Left</button>
+                                <button onclick="rotateImage(90)">↷ Right</button>
                             </div>
                         </div>
                         
@@ -161,16 +132,6 @@
                                 <input type="range" id="brightness" min="-100" max="100" value="0" onchange="adjustBrightness()">
                                 <span id="brightnessValue">0</span>
                             </div>
-                            <div class="control-item">
-                                <label>Contrast:</label>
-                                <input type="range" id="contrast" min="-100" max="100" value="0" onchange="adjustContrast()">
-                                <span id="contrastValue">0</span>
-                            </div>
-                            <div class="control-item">
-                                <label>Saturation:</label>
-                                <input type="range" id="saturation" min="-100" max="100" value="0" onchange="adjustSaturation()">
-                                <span id="saturationValue">0</span>
-                            </div>
                         </div>
                         
                         <div class="control-group">
@@ -178,33 +139,6 @@
                             <div class="control-item">
                                 <button onclick="enableAdvancedCrop()" class="btn btn-secondary">Enable Crop</button>
                                 <button onclick="resetCrop()" class="btn btn-secondary">Reset Crop</button>
-                            </div>
-                            <div class="control-item">
-                                <label>Aspect Ratio:</label>
-                                <select id="aspectRatio" onchange="setAspectRatio()">
-                                    <option value="NaN">Free</option>
-                                    <option value="1">1:1 (Square)</option>
-                                    <option value="1.333">4:3</option>
-                                    <option value="1.777">16:9</option>
-                                    <option value="0.75">3:4</option>
-                                    <option value="0.5625">9:16</option>
-                                </select>
-                            </div>
-                            <div class="control-item">
-                                <label>Zoom:</label>
-                                <input type="range" id="zoomLevel" min="0.1" max="3" step="0.1" value="1" onchange="setZoom()">
-                                <span id="zoomValue">100%</span>
-                            </div>
-                            <div class="control-item">
-                                <button onclick="applyCrop()" class="btn btn-primary">Apply Crop</button>
-                            </div>
-                        </div>
-                        
-                        <div class="control-group">
-                            <h4>Actions</h4>
-                            <div class="control-item">
-                                <button onclick="resetImage()" class="btn btn-secondary">Reset All</button>
-                                <button onclick="saveEdits()" class="btn btn-primary">Save Changes</button>
                             </div>
                         </div>
                     </div>
@@ -215,4 +149,4 @@
 
     <script src="script.js"></script>
 </body>
-</html>
+</html> 
