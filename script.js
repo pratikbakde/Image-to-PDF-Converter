@@ -834,7 +834,6 @@ function startCamera() {
             video.play().catch(function(err) {
                 console.error('Error playing video:', err);
             });
-            setVideoOrientation();
         };
     })
     .catch(function(err) {
@@ -863,7 +862,6 @@ function startCamera() {
                     video.play().catch(function(err) {
                         console.error('Error playing video:', err);
                     });
-                    setVideoOrientation();
                 };
             })
             .catch(function(err2) {
@@ -900,19 +898,48 @@ function capturePhoto() {
     const captureBtn = document.querySelector('.capture-btn');
     const retakeBtn = document.getElementById('retakeBtn');
     const usePhotoBtn = document.getElementById('usePhotoBtn');
-    
-    // Set canvas dimensions to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Draw video frame to canvas
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // Show captured image
-    video.style.display = 'none';
+
+    // Determine if device is in portrait mode
+    const isPortrait = window.innerHeight > window.innerWidth;
+    let outputWidth, outputHeight;
+
+    if (isPortrait && video.videoWidth > video.videoHeight) {
+        // Camera is landscape, device is portrait: rotate
+        outputWidth = video.videoHeight;
+        outputHeight = video.videoWidth;
+        canvas.width = outputWidth;
+        canvas.height = outputHeight;
+        const ctx = canvas.getContext('2d');
+        // Rotate 90deg clockwise
+        ctx.save();
+        ctx.translate(outputWidth, 0);
+        ctx.rotate(Math.PI / 2);
+        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, outputHeight, outputWidth);
+        ctx.restore();
+        // Set canvas style for portrait
+        canvas.style.width = '60vw';
+        canvas.style.height = '80vw';
+    } else {
+        // No rotation needed
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Set canvas style for landscape
+        canvas.style.width = '80vw';
+        canvas.style.height = '60vw';
+    }
+
+    // Center the canvas
     canvas.style.display = 'block';
-    
+    canvas.style.margin = '20px auto';
+    canvas.style.background = '#000';
+    canvas.style.borderRadius = '12px';
+    canvas.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+
+    // Hide video
+    video.style.display = 'none';
+
     // Show retake and use photo buttons
     captureBtn.style.display = 'none';
     retakeBtn.style.display = 'inline-block';
@@ -982,18 +1009,4 @@ function resetCameraUI() {
     captureBtn.style.display = 'inline-block';
     retakeBtn.style.display = 'none';
     usePhotoBtn.style.display = 'none';
-}
-
-function setVideoOrientation() {
-    const video = document.getElementById('cameraVideo');
-    if (window.innerHeight > window.innerWidth) {
-        // Portrait mode
-        video.classList.add('portrait-video');
-    } else {
-        // Landscape mode
-        video.classList.remove('portrait-video');
-    }
-}
-
-window.addEventListener('orientationchange', setVideoOrientation);
-window.addEventListener('resize', setVideoOrientation); 
+} 
