@@ -834,6 +834,7 @@ function startCamera() {
             video.play().catch(function(err) {
                 console.error('Error playing video:', err);
             });
+            setVideoOrientation();
         };
     })
     .catch(function(err) {
@@ -862,6 +863,7 @@ function startCamera() {
                     video.play().catch(function(err) {
                         console.error('Error playing video:', err);
                     });
+                    setVideoOrientation();
                 };
             })
             .catch(function(err2) {
@@ -980,4 +982,18 @@ function resetCameraUI() {
     captureBtn.style.display = 'inline-block';
     retakeBtn.style.display = 'none';
     usePhotoBtn.style.display = 'none';
-} 
+}
+
+function setVideoOrientation() {
+    const video = document.getElementById('cameraVideo');
+    if (window.innerHeight > window.innerWidth) {
+        // Portrait mode
+        video.classList.add('portrait-video');
+    } else {
+        // Landscape mode
+        video.classList.remove('portrait-video');
+    }
+}
+
+window.addEventListener('orientationchange', setVideoOrientation);
+window.addEventListener('resize', setVideoOrientation); 
