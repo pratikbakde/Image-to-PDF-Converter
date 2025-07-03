@@ -1083,4 +1083,11 @@ footer {
     .images-grid {
         gap: 8px;
     }
+}
+
+.portrait-video {
+    transform: rotate(90deg);
+    width: 100vh !important;
+    height: 100vw !important;
+    object-fit: cover;
 } 
