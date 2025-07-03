@@ -807,13 +807,13 @@ function startCamera() {
         return;
     }
     
-    // Get camera stream with 4:3 aspect ratio
+    // Get camera stream with 3:4 aspect ratio (portrait)
     const constraints = {
         video: {
             facingMode: facingMode,
-            width: { ideal: 1280, min: 640 },
-            height: { ideal: 960, min: 480 },
-            aspectRatio: { ideal: 1.333333 }, // 4:3 aspect ratio
+            width: { ideal: 720, min: 480 },
+            height: { ideal: 960, min: 640 },
+            aspectRatio: { ideal: 0.75 }, // 3:4 aspect ratio (portrait)
             frameRate: { ideal: 30, min: 15 }
         }
     };
@@ -845,9 +845,9 @@ function startCamera() {
             navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: facingMode,
-                    width: { ideal: 640 },
-                    height: { ideal: 480 },
-                    aspectRatio: { ideal: 1.333333 } // 4:3 aspect ratio
+                    width: { ideal: 480 },
+                    height: { ideal: 640 },
+                    aspectRatio: { ideal: 0.75 } // 3:4 aspect ratio (portrait)
                 }
             })
             .then(function(stream) {
