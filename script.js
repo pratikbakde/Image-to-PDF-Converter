@@ -297,6 +297,7 @@ function resetControls() {
     document.getElementById('brightnessValue').textContent = '0';
     document.getElementById('contrastValue').textContent = '0';
     document.getElementById('saturationValue').textContent = '0';
+    document.getElementById('aspectRatio').value = 'NaN';
     document.getElementById('zoomLevel').value = 1;
     document.getElementById('zoomValue').textContent = '100%';
 }
@@ -465,10 +466,10 @@ function enableAdvancedCrop() {
     }
     
     cropper = new Cropper(cropImage, {
-        aspectRatio: NaN, // Free crop - no fixed aspect ratio
+        aspectRatio: NaN,
         viewMode: 1,
         dragMode: 'move',
-        autoCropArea: 0.8,
+        autoCropArea: 1,
         restore: false,
         guides: true,
         center: true,
@@ -480,17 +481,25 @@ function enableAdvancedCrop() {
         zoomOnWheel: true,
         wheelZoomRatio: 0.1,
         ready: function() {
-            // Allow free cropping from all sides
-            cropper.setAspectRatio(NaN);
+            // Set initial aspect ratio if selected
+            const aspectRatio = document.getElementById('aspectRatio').value;
+            if (aspectRatio !== 'NaN') {
+                cropper.setAspectRatio(parseFloat(aspectRatio));
+            }
         }
     });
 }
 
-// Set aspect ratio (removed - now using free crop)
+// Set aspect ratio
 function setAspectRatio() {
     if (!cropper) return;
-    // Always use free crop
-    cropper.setAspectRatio(NaN);
+    
+    const aspectRatio = document.getElementById('aspectRatio').value;
+    if (aspectRatio === 'NaN') {
+        cropper.setAspectRatio(NaN);
+    } else {
+        cropper.setAspectRatio(parseFloat(aspectRatio));
+    }
 }
 
 // Set zoom level
@@ -798,13 +807,13 @@ function startCamera() {
         return;
     }
     
-    // Get camera stream with 9:16 portrait orientation
+    // Get camera stream with 4:3 aspect ratio
     const constraints = {
         video: {
             facingMode: facingMode,
-            width: { ideal: 720, min: 480 },
-            height: { ideal: 1280, min: 960 },
-            aspectRatio: { ideal: 0.5625 }, // 9:16 aspect ratio (portrait)
+            width: { ideal: 1280, min: 640 },
+            height: { ideal: 960, min: 480 },
+            aspectRatio: { ideal: 1.333333 }, // 4:3 aspect ratio
             frameRate: { ideal: 30, min: 15 }
         }
     };
@@ -836,9 +845,9 @@ function startCamera() {
             navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: facingMode,
-                    width: { ideal: 480 },
-                    height: { ideal: 854 },
-                    aspectRatio: { ideal: 0.5625 } // 9:16 aspect ratio (portrait)
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    aspectRatio: { ideal: 1.333333 } // 4:3 aspect ratio
                 }
             })
             .then(function(stream) {
@@ -889,43 +898,19 @@ function capturePhoto() {
     const captureBtn = document.querySelector('.capture-btn');
     const retakeBtn = document.getElementById('retakeBtn');
     const usePhotoBtn = document.getElementById('usePhotoBtn');
-
-    // Set canvas dimensions to match video exactly
+    
+    // Set canvas dimensions to match video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     
+    // Draw video frame to canvas
     const ctx = canvas.getContext('2d');
-    
-    // Draw the video frame directly without any rotation or scaling
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Use landscape styling for captured image (maintain original aspect ratio)
-    const aspectRatio = canvas.width / canvas.height;
-    if (aspectRatio > 1) {
-        // Landscape image
-        canvas.style.width = '90vw';
-        canvas.style.height = '50vw';
-        canvas.style.maxWidth = '600px';
-        canvas.style.maxHeight = '400px';
-    } else {
-        // Portrait image
-        canvas.style.width = '60vw';
-        canvas.style.height = '90vw';
-        canvas.style.maxWidth = '400px';
-        canvas.style.maxHeight = '600px';
-    }
-
-    // Center the canvas
-    canvas.style.display = 'block';
-    canvas.style.margin = '20px auto';
-    canvas.style.background = '#000';
-    canvas.style.borderRadius = '12px';
-    canvas.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
-    canvas.style.objectFit = 'contain';
-
-    // Hide video
+    // Show captured image
     video.style.display = 'none';
-
+    canvas.style.display = 'block';
+    
     // Show retake and use photo buttons
     captureBtn.style.display = 'none';
     retakeBtn.style.display = 'inline-block';
