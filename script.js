@@ -297,7 +297,7 @@ function resetControls() {
     document.getElementById('brightnessValue').textContent = '0';
     document.getElementById('contrastValue').textContent = '0';
     document.getElementById('saturationValue').textContent = '0';
-    document.getElementById('aspectRatio').value = 'NaN';
+    document.getElementById('aspectRatio').value = '1';
     document.getElementById('zoomLevel').value = 1;
     document.getElementById('zoomValue').textContent = '100%';
 }
@@ -466,10 +466,10 @@ function enableAdvancedCrop() {
     }
     
     cropper = new Cropper(cropImage, {
-        aspectRatio: NaN,
+        aspectRatio: 1, // Default to square crop
         viewMode: 1,
         dragMode: 'move',
-        autoCropArea: 1,
+        autoCropArea: 0.8,
         restore: false,
         guides: true,
         center: true,
@@ -485,6 +485,9 @@ function enableAdvancedCrop() {
             const aspectRatio = document.getElementById('aspectRatio').value;
             if (aspectRatio !== 'NaN') {
                 cropper.setAspectRatio(parseFloat(aspectRatio));
+            } else {
+                // Default to square if no aspect ratio is selected
+                cropper.setAspectRatio(1);
             }
         }
     });
@@ -807,12 +810,12 @@ function startCamera() {
         return;
     }
     
-    // Get camera stream with portrait orientation
+    // Get camera stream with 9:16 portrait orientation
     const constraints = {
         video: {
             facingMode: facingMode,
             width: { ideal: 720, min: 480 },
-            height: { ideal: 1280, min: 640 },
+            height: { ideal: 1280, min: 960 },
             aspectRatio: { ideal: 0.5625 }, // 9:16 aspect ratio (portrait)
             frameRate: { ideal: 30, min: 15 }
         }
@@ -910,14 +913,14 @@ function capturePhoto() {
     
     // Set canvas style to maintain aspect ratio and fit in modal
     const aspectRatio = canvas.width / canvas.height;
-    if (aspectRatio > 1) {
-        // Landscape image
-        canvas.style.width = '80vw';
-        canvas.style.height = '60vw';
-    } else {
-        // Portrait image
+    if (aspectRatio < 1) {
+        // Portrait image (9:16)
         canvas.style.width = '60vw';
-        canvas.style.height = '80vw';
+        canvas.style.height = '90vw';
+    } else {
+        // Landscape image (fallback)
+        canvas.style.width = '90vw';
+        canvas.style.height = '50vw';
     }
 
     // Center the canvas
