@@ -297,7 +297,6 @@ function resetControls() {
     document.getElementById('brightnessValue').textContent = '0';
     document.getElementById('contrastValue').textContent = '0';
     document.getElementById('saturationValue').textContent = '0';
-    document.getElementById('aspectRatio').value = '0.5625';
     document.getElementById('zoomLevel').value = 1;
     document.getElementById('zoomValue').textContent = '100%';
 }
@@ -466,7 +465,7 @@ function enableAdvancedCrop() {
     }
     
     cropper = new Cropper(cropImage, {
-        aspectRatio: 0.5625, // Default to 9:16 aspect ratio (portrait)
+        aspectRatio: NaN, // Free crop - no fixed aspect ratio
         viewMode: 1,
         dragMode: 'move',
         autoCropArea: 0.8,
@@ -481,28 +480,17 @@ function enableAdvancedCrop() {
         zoomOnWheel: true,
         wheelZoomRatio: 0.1,
         ready: function() {
-            // Set initial aspect ratio if selected
-            const aspectRatio = document.getElementById('aspectRatio').value;
-            if (aspectRatio !== 'NaN') {
-                cropper.setAspectRatio(parseFloat(aspectRatio));
-            } else {
-                // Default to 9:16 if no aspect ratio is selected
-                cropper.setAspectRatio(0.5625);
-            }
+            // Allow free cropping from all sides
+            cropper.setAspectRatio(NaN);
         }
     });
 }
 
-// Set aspect ratio
+// Set aspect ratio (removed - now using free crop)
 function setAspectRatio() {
     if (!cropper) return;
-    
-    const aspectRatio = document.getElementById('aspectRatio').value;
-    if (aspectRatio === 'NaN') {
-        cropper.setAspectRatio(NaN);
-    } else {
-        cropper.setAspectRatio(parseFloat(aspectRatio));
-    }
+    // Always use free crop
+    cropper.setAspectRatio(NaN);
 }
 
 // Set zoom level
@@ -902,7 +890,7 @@ function capturePhoto() {
     const retakeBtn = document.getElementById('retakeBtn');
     const usePhotoBtn = document.getElementById('usePhotoBtn');
 
-    // Set canvas dimensions to match video exactly (9:16)
+    // Set canvas dimensions to match video exactly
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     
@@ -911,11 +899,21 @@ function capturePhoto() {
     // Draw the video frame directly without any rotation or scaling
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Always use 9:16 aspect ratio styling for captured image
-    canvas.style.width = '60vw';
-    canvas.style.height = '90vw';
-    canvas.style.maxWidth = '400px';
-    canvas.style.maxHeight = '600px';
+    // Use landscape styling for captured image (maintain original aspect ratio)
+    const aspectRatio = canvas.width / canvas.height;
+    if (aspectRatio > 1) {
+        // Landscape image
+        canvas.style.width = '90vw';
+        canvas.style.height = '50vw';
+        canvas.style.maxWidth = '600px';
+        canvas.style.maxHeight = '400px';
+    } else {
+        // Portrait image
+        canvas.style.width = '60vw';
+        canvas.style.height = '90vw';
+        canvas.style.maxWidth = '400px';
+        canvas.style.maxHeight = '600px';
+    }
 
     // Center the canvas
     canvas.style.display = 'block';
