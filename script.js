@@ -297,7 +297,6 @@ function resetControls() {
     document.getElementById('brightnessValue').textContent = '0';
     document.getElementById('contrastValue').textContent = '0';
     document.getElementById('saturationValue').textContent = '0';
-    document.getElementById('aspectRatio').value = 'NaN';
     document.getElementById('zoomLevel').value = 1;
     document.getElementById('zoomValue').textContent = '100%';
 }
@@ -807,13 +806,13 @@ function startCamera() {
         return;
     }
     
-    // Get camera stream with 4:3 aspect ratio
+    // Get camera stream with 9:16 portrait aspect ratio
     const constraints = {
         video: {
             facingMode: facingMode,
-            width: { ideal: 1280, min: 640 },
-            height: { ideal: 960, min: 480 },
-            aspectRatio: { ideal: 1.333333 }, // 4:3 aspect ratio
+            width: { ideal: 720, min: 480 },
+            height: { ideal: 1280, min: 960 },
+            aspectRatio: { ideal: 0.5625 }, // 9:16 aspect ratio (portrait)
             frameRate: { ideal: 30, min: 15 }
         }
     };
@@ -845,9 +844,9 @@ function startCamera() {
             navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: facingMode,
-                    width: { ideal: 640 },
-                    height: { ideal: 480 },
-                    aspectRatio: { ideal: 1.333333 } // 4:3 aspect ratio
+                    width: { ideal: 480 },
+                    height: { ideal: 854 },
+                    aspectRatio: { ideal: 0.5625 } // 9:16 aspect ratio (portrait)
                 }
             })
             .then(function(stream) {
@@ -898,19 +897,33 @@ function capturePhoto() {
     const captureBtn = document.querySelector('.capture-btn');
     const retakeBtn = document.getElementById('retakeBtn');
     const usePhotoBtn = document.getElementById('usePhotoBtn');
-    
-    // Set canvas dimensions to match video
+
+    // Set canvas dimensions to match video exactly (9:16)
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     
-    // Draw video frame to canvas
     const ctx = canvas.getContext('2d');
+    
+    // Draw the video frame directly without any rotation or scaling
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Show captured image
-    video.style.display = 'none';
+    // Always use 9:16 aspect ratio styling for captured image
+    canvas.style.width = '60vw';
+    canvas.style.height = '90vw';
+    canvas.style.maxWidth = '400px';
+    canvas.style.maxHeight = '600px';
+
+    // Center the canvas
     canvas.style.display = 'block';
-    
+    canvas.style.margin = '20px auto';
+    canvas.style.background = '#000';
+    canvas.style.borderRadius = '12px';
+    canvas.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+    canvas.style.objectFit = 'contain';
+
+    // Hide video
+    video.style.display = 'none';
+
     // Show retake and use photo buttons
     captureBtn.style.display = 'none';
     retakeBtn.style.display = 'inline-block';
