@@ -120,6 +120,21 @@
                                     <button onclick="resetCrop()" class="btn btn-secondary">Reset Crop</button>
                                 </div>
                             </div>
+                            <div class="control-item">
+                                <label>Aspect Ratio:</label>
+                                <select id="aspectRatio" onchange="setAspectRatio()">
+                                    <option value="0.5625" selected>9:16 (Portrait)</option>
+                                    <option value="1">Square (1:1)</option>
+                                    <option value="4/3">4:3</option>
+                                    <option value="3/4">3:4</option>
+                                    <option value="16/9">16:9</option>
+                                    <option value="NaN">Free</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label>Zoom: <span id="zoomValue">100%</span></label>
+                                <input type="range" id="zoomLevel" min="0.1" max="3" step="0.1" value="1" onchange="setZoom()">
+                            </div>
                         </div>
                     </div>
                 </div>
