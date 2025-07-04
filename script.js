@@ -807,13 +807,13 @@ function startCamera() {
         return;
     }
     
-    // Get camera stream with 3:4 aspect ratio (portrait)
+    // Get camera stream with portrait orientation
     const constraints = {
         video: {
             facingMode: facingMode,
             width: { ideal: 720, min: 480 },
-            height: { ideal: 960, min: 640 },
-            aspectRatio: { ideal: 0.75 }, // 3:4 aspect ratio (portrait)
+            height: { ideal: 1280, min: 640 },
+            aspectRatio: { ideal: 0.5625 }, // 9:16 aspect ratio (portrait)
             frameRate: { ideal: 30, min: 15 }
         }
     };
@@ -846,8 +846,8 @@ function startCamera() {
                 video: {
                     facingMode: facingMode,
                     width: { ideal: 480 },
-                    height: { ideal: 640 },
-                    aspectRatio: { ideal: 0.75 } // 3:4 aspect ratio (portrait)
+                    height: { ideal: 854 },
+                    aspectRatio: { ideal: 0.5625 } // 9:16 aspect ratio (portrait)
                 }
             })
             .then(function(stream) {
@@ -899,35 +899,25 @@ function capturePhoto() {
     const retakeBtn = document.getElementById('retakeBtn');
     const usePhotoBtn = document.getElementById('usePhotoBtn');
 
-    // Determine if device is in portrait mode
-    const isPortrait = window.innerHeight > window.innerWidth;
-    let outputWidth, outputHeight;
-
-    if (isPortrait && video.videoWidth > video.videoHeight) {
-        // Camera is landscape, device is portrait: rotate
-        outputWidth = video.videoHeight;
-        outputHeight = video.videoWidth;
-        canvas.width = outputWidth;
-        canvas.height = outputHeight;
-        const ctx = canvas.getContext('2d');
-        // Rotate 90deg clockwise
-        ctx.save();
-        ctx.translate(outputWidth, 0);
-        ctx.rotate(Math.PI / 2);
-        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, outputHeight, outputWidth);
-        ctx.restore();
-        // Set canvas style for portrait
-        canvas.style.width = '60vw';
-        canvas.style.height = '80vw';
-    } else {
-        // No rotation needed
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        // Set canvas style for landscape
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Draw the video frame directly without rotation
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Set canvas style to maintain aspect ratio and fit in modal
+    const aspectRatio = canvas.width / canvas.height;
+    if (aspectRatio > 1) {
+        // Landscape image
         canvas.style.width = '80vw';
         canvas.style.height = '60vw';
+    } else {
+        // Portrait image
+        canvas.style.width = '60vw';
+        canvas.style.height = '80vw';
     }
 
     // Center the canvas
