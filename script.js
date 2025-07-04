@@ -297,7 +297,7 @@ function resetControls() {
     document.getElementById('brightnessValue').textContent = '0';
     document.getElementById('contrastValue').textContent = '0';
     document.getElementById('saturationValue').textContent = '0';
-    document.getElementById('aspectRatio').value = '1';
+    document.getElementById('aspectRatio').value = '0.5625';
     document.getElementById('zoomLevel').value = 1;
     document.getElementById('zoomValue').textContent = '100%';
 }
@@ -466,7 +466,7 @@ function enableAdvancedCrop() {
     }
     
     cropper = new Cropper(cropImage, {
-        aspectRatio: 1, // Default to square crop
+        aspectRatio: 0.5625, // Default to 9:16 aspect ratio (portrait)
         viewMode: 1,
         dragMode: 'move',
         autoCropArea: 0.8,
@@ -486,8 +486,8 @@ function enableAdvancedCrop() {
             if (aspectRatio !== 'NaN') {
                 cropper.setAspectRatio(parseFloat(aspectRatio));
             } else {
-                // Default to square if no aspect ratio is selected
-                cropper.setAspectRatio(1);
+                // Default to 9:16 if no aspect ratio is selected
+                cropper.setAspectRatio(0.5625);
             }
         }
     });
@@ -902,26 +902,20 @@ function capturePhoto() {
     const retakeBtn = document.getElementById('retakeBtn');
     const usePhotoBtn = document.getElementById('usePhotoBtn');
 
-    // Set canvas dimensions to match video
+    // Set canvas dimensions to match video exactly (9:16)
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     
     const ctx = canvas.getContext('2d');
     
-    // Draw the video frame directly without rotation
+    // Draw the video frame directly without any rotation or scaling
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Set canvas style to maintain aspect ratio and fit in modal
-    const aspectRatio = canvas.width / canvas.height;
-    if (aspectRatio < 1) {
-        // Portrait image (9:16)
-        canvas.style.width = '60vw';
-        canvas.style.height = '90vw';
-    } else {
-        // Landscape image (fallback)
-        canvas.style.width = '90vw';
-        canvas.style.height = '50vw';
-    }
+    // Always use 9:16 aspect ratio styling for captured image
+    canvas.style.width = '60vw';
+    canvas.style.height = '90vw';
+    canvas.style.maxWidth = '400px';
+    canvas.style.maxHeight = '600px';
 
     // Center the canvas
     canvas.style.display = 'block';
@@ -929,6 +923,7 @@ function capturePhoto() {
     canvas.style.background = '#000';
     canvas.style.borderRadius = '12px';
     canvas.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+    canvas.style.objectFit = 'contain';
 
     // Hide video
     video.style.display = 'none';
