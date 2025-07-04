@@ -691,13 +691,13 @@ footer {
 .camera-container {
     position: relative;
     width: 100%;
-    height: 60vh;
-    max-height: 500px;
+    height: 70vh;
+    max-height: 600px;
     background: #000;
     border-radius: 12px;
     overflow: hidden;
     margin-bottom: 15px;
-    aspect-ratio: 4/3;
+    aspect-ratio: 9/16;
 }
 
 #cameraVideo {
@@ -879,7 +879,8 @@ footer {
     }
     
     .camera-container {
-        max-height: 60vh;
+        max-height: 70vh;
+        aspect-ratio: 9/16;
     }
     
     .camera-controls {
@@ -1010,8 +1011,8 @@ footer {
     
     .camera-container {
         height: auto;
-        max-height: 60vh;
-        aspect-ratio: 4/3;
+        max-height: 70vh;
+        aspect-ratio: 9/16;
     }
     
     .camera-controls {
