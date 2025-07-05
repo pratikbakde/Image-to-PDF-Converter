@@ -72,8 +72,8 @@
             position: absolute;
             border: 2px solid #3b82f6;
             background: rgba(59, 130, 246, 0.1);
-            cursor: default;
-            pointer-events: none;
+            cursor: move;
+            pointer-events: auto;
             box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
         }
         
@@ -98,10 +98,6 @@
         .crop-handle.ne { top: -6px; right: -6px; cursor: ne-resize; }
         .crop-handle.sw { bottom: -6px; left: -6px; cursor: sw-resize; }
         .crop-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
-        .crop-handle.n { top: -6px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
-        .crop-handle.s { bottom: -6px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
-        .crop-handle.w { top: 50%; left: -6px; transform: translateY(-50%); cursor: w-resize; }
-        .crop-handle.e { top: 50%; right: -6px; transform: translateY(-50%); cursor: e-resize; }
         
         .modal-content {
             max-height: 95vh;
@@ -298,7 +294,7 @@
         <!-- Header -->
         <div class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
-                <i class="fas fa-crop text-blue-600"></i> Perfect Crop Image to PDF Converter
+                <i class="fas fa-crop text-blue-600"></i> Image to PDF Converter
             </h1>
             <p class="text-gray-600 text-sm sm:text-base">Upload, crop with precision, and convert to PDF</p>
         </div>
@@ -356,10 +352,6 @@
                                     <div class="crop-handle ne"></div>
                                     <div class="crop-handle sw"></div>
                                     <div class="crop-handle se"></div>
-                                    <div class="crop-handle n"></div>
-                                    <div class="crop-handle s"></div>
-                                    <div class="crop-handle w"></div>
-                                    <div class="crop-handle e"></div>
                                 </div>
                             </div>
                         </div>
@@ -484,9 +476,14 @@
         });
 
         function setupCropEvents() {
+            const cropArea = document.getElementById('cropArea');
             const handles = document.querySelectorAll('.crop-handle');
 
-            // Handle drag only (no crop area drag)
+            // Crop area drag
+            cropArea.addEventListener('mousedown', startDrag);
+            cropArea.addEventListener('touchstart', startDrag);
+
+            // Handle drag
             handles.forEach(handle => {
                 handle.addEventListener('mousedown', (e) => startHandleDrag(e, handle));
                 handle.addEventListener('touchstart', (e) => startHandleDrag(e, handle));
@@ -693,6 +690,19 @@
             updateCropArea();
         }
 
+        function startDrag(e) {
+            if (!isCropMode) return;
+            
+            isDragging = true;
+            currentHandle = null;
+            
+            const rect = e.currentTarget.getBoundingClientRect();
+            startX = (e.clientX || e.touches[0].clientX) - rect.left;
+            startY = (e.clientY || e.touches[0].clientY) - rect.top;
+            
+            e.preventDefault();
+        }
+
         function startHandleDrag(e, handle) {
             if (!isCropMode) return;
             
@@ -713,7 +723,7 @@
             const currentY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : startY);
             
             if (currentHandle) {
-                // Handle resize only
+                // Handle resize
                 const deltaX = currentX - startX;
                 const deltaY = currentY - startY;
                 
@@ -735,21 +745,32 @@
                 } else if (handleClass.includes('se')) {
                     cropData.width += deltaX;
                     cropData.height += deltaY;
-                } else if (handleClass.includes('n ')) {
-                    cropData.height -= deltaY;
-                    cropData.y += deltaY;
-                } else if (handleClass.includes('s ')) {
-                    cropData.height += deltaY;
-                } else if (handleClass.includes('w ')) {
-                    cropData.width -= deltaX;
-                    cropData.x += deltaX;
-                } else if (handleClass.includes('e ')) {
-                    cropData.width += deltaX;
                 }
                 
                 // Ensure minimum size
                 if (cropData.width < 50) cropData.width = 50;
                 if (cropData.height < 50) cropData.height = 50;
+                
+                // Keep within bounds
+                if (cropData.x < 0) cropData.x = 0;
+                if (cropData.y < 0) cropData.y = 0;
+                if (cropData.x + cropData.width > cropData.imageWidth) {
+                    cropData.x = cropData.imageWidth - cropData.width;
+                }
+                if (cropData.y + cropData.height > cropData.imageHeight) {
+                    cropData.y = cropData.imageHeight - cropData.height;
+                }
+                
+                startX = currentX;
+                startY = currentY;
+                
+            } else {
+                // Handle move
+                const deltaX = currentX - startX;
+                const deltaY = currentY - startY;
+                
+                cropData.x += deltaX;
+                cropData.y += deltaY;
                 
                 // Keep within bounds
                 if (cropData.x < 0) cropData.x = 0;
@@ -829,8 +850,8 @@
                 ctx.putImageData(imageData, 0, 0);
             }
             
-            // Update image with high quality
-            const croppedDataURL = canvas.toDataURL('image/jpeg', 1.0);
+            // Update image
+            const croppedDataURL = canvas.toDataURL('image/jpeg', 0.95);
             editImage.src = croppedDataURL;
             
             // Create new image object
@@ -893,7 +914,7 @@
             
             ctx.drawImage(originalImage, 0, 0);
             
-            const rotatedDataURL = canvas.toDataURL('image/jpeg', 1.0);
+            const rotatedDataURL = canvas.toDataURL('image/jpeg', 0.95);
             const editImage = document.getElementById('editImage');
             editImage.src = rotatedDataURL;
             
@@ -950,7 +971,7 @@
                 ctx.putImageData(imageData, 0, 0);
             }
             
-            editImage.src = canvas.toDataURL('image/jpeg', 1.0);
+            editImage.src = canvas.toDataURL('image/jpeg', 0.95);
         }
 
         function resetImage() {
@@ -1040,8 +1061,7 @@
                         pdf.addPage();
                     }
                     
-                    // Use high quality settings for better PDF clarity
-                    pdf.addImage(image.src, 'JPEG', x, y, finalWidth, finalHeight, undefined, 'FAST', 0);
+                    pdf.addImage(image.src, 'JPEG', x, y, finalWidth, finalHeight, undefined, 'FAST');
                     
                     loadedImages++;
                     if (loadedImages === images.length) {
@@ -1054,5 +1074,6 @@
         }
     </script>
 </body>
-</html> 
+</html>
+
 
