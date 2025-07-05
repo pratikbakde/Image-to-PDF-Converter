@@ -72,8 +72,8 @@
             position: absolute;
             border: 2px solid #3b82f6;
             background: rgba(59, 130, 246, 0.1);
-            cursor: move;
-            pointer-events: auto;
+            cursor: default;
+            pointer-events: none;
             box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
         }
         
@@ -113,6 +113,38 @@
             border-radius: 8px;
             padding: 1rem;
             margin: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .controls-section.hidden-in-crop {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.9);
+        }
+        
+        .crop-actions {
+            display: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        
+        .crop-actions.active {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .btn-primary {
@@ -163,6 +195,44 @@
             transform: translateY(-1px);
         }
         
+        .btn-crop-action {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1f2937;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            margin: 0 0.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-crop-action:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-crop-apply {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-crop-apply:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+        
+        .btn-crop-reset {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+        }
+        
+        .btn-crop-reset:hover {
+            background: linear-gradient(135deg, #4b5563, #374151);
+        }
+        
         .image-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -203,8 +273,13 @@
             display: inline-block;
         }
         
-        .hidden {
-            display: none !important;
+        .edit-header {
+            transition: all 0.3s ease;
+        }
+        
+        .edit-header.crop-mode {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
         
         @media (max-width: 768px) {
@@ -223,7 +298,7 @@
         <!-- Header -->
         <div class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
-                <i class="fas fa-crop text-blue-600"></i> Image to PDF Converter
+                <i class="fas fa-crop text-blue-600"></i> Perfect Crop Image to PDF Converter
             </h1>
             <p class="text-gray-600 text-sm sm:text-base">Upload, crop with precision, and convert to PDF</p>
         </div>
@@ -263,8 +338,8 @@
     <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen p-2">
             <div class="bg-white rounded-lg w-full max-w-6xl modal-content">
-                <div class="p-4 border-b flex justify-between items-center">
-                    <h3 class="text-xl font-semibold text-gray-800">Edit Image - Perfect Crop Tool</h3>
+                <div id="editHeader" class="edit-header p-4 border-b flex justify-between items-center">
+                    <h3 class="text-xl font-semibold">Edit Image - Perfect Crop Tool</h3>
                     <button onclick="closeEditModal()" class="text-gray-500 hover:text-gray-700">
                         <i class="fas fa-times text-xl"></i>
                     </button>
@@ -290,8 +365,18 @@
                         </div>
                     </div>
                     
-                    <!-- Editing Controls -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Crop Action Buttons (Only visible during crop mode) -->
+                    <div id="cropActions" class="crop-actions">
+                        <button onclick="applyCrop()" class="btn-crop-action btn-crop-apply">
+                            <i class="fas fa-check mr-2"></i>Apply
+                        </button>
+                        <button onclick="resetCrop()" class="btn-crop-action btn-crop-reset">
+                            <i class="fas fa-undo mr-2"></i>Reset
+                        </button>
+                    </div>
+                    
+                    <!-- Regular Editing Controls -->
+                    <div id="regularControls" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <!-- Rotate Controls -->
                         <div class="controls-section">
                             <h4 class="font-semibold text-gray-700 mb-3 text-center">Rotate</h4>
@@ -311,9 +396,6 @@
                             <div class="flex justify-center gap-2">
                                 <button id="cropBtn" onclick="toggleCrop()" class="btn-success text-sm">
                                     <i class="fas fa-crop mr-1"></i>Enable
-                                </button>
-                                <button id="applyBtn" onclick="applyCrop()" class="btn-primary text-sm hidden">
-                                    <i class="fas fa-check mr-1"></i>Apply
                                 </button>
                             </div>
                         </div>
@@ -346,7 +428,7 @@
                     </div>
                     
                     <!-- Action Buttons -->
-                    <div class="flex flex-col sm:flex-row gap-4 mt-6 pt-4 border-t">
+                    <div id="actionButtons" class="flex flex-col sm:flex-row gap-4 mt-6 pt-4 border-t">
                         <button onclick="resetImage()" class="flex-1 bg-gray-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
                             <i class="fas fa-undo mr-2"></i>Reset All
                         </button>
@@ -402,14 +484,9 @@
         });
 
         function setupCropEvents() {
-            const cropArea = document.getElementById('cropArea');
             const handles = document.querySelectorAll('.crop-handle');
 
-            // Crop area drag
-            cropArea.addEventListener('mousedown', startDrag);
-            cropArea.addEventListener('touchstart', startDrag);
-
-            // Handle drag
+            // Handle drag only (no crop area drag)
             handles.forEach(handle => {
                 handle.addEventListener('mousedown', (e) => startHandleDrag(e, handle));
                 handle.addEventListener('touchstart', (e) => startHandleDrag(e, handle));
@@ -498,14 +575,6 @@
             document.getElementById('brightnessValue').textContent = '0';
             document.getElementById('contrastValue').textContent = '0';
             
-            // Reset crop mode
-            isCropMode = false;
-            const cropBtn = document.getElementById('cropBtn');
-            const applyBtn = document.getElementById('applyBtn');
-            cropBtn.innerHTML = '<i class="fas fa-crop mr-1"></i>Enable';
-            cropBtn.className = 'btn-success text-sm';
-            applyBtn.classList.add('hidden');
-            
             // Setup image
             const editImage = document.getElementById('editImage');
             editImage.src = image.src;
@@ -515,6 +584,11 @@
             editImage.onload = () => {
                 initializeCropArea();
             };
+            
+            // Reset crop mode
+            if (isCropMode) {
+                exitCropMode();
+            }
             
             // Show modal
             document.getElementById('editModal').classList.remove('hidden');
@@ -565,34 +639,58 @@
         }
 
         function toggleCrop() {
-            isCropMode = !isCropMode;
-            const cropBtn = document.getElementById('cropBtn');
-            const applyBtn = document.getElementById('applyBtn');
-            
             if (isCropMode) {
-                cropBtn.innerHTML = '<i class="fas fa-times mr-1"></i>Cancel';
-                cropBtn.className = 'btn-danger text-sm';
-                applyBtn.classList.remove('hidden');
+                exitCropMode();
             } else {
-                cropBtn.innerHTML = '<i class="fas fa-crop mr-1"></i>Enable';
-                cropBtn.className = 'btn-success text-sm';
-                applyBtn.classList.add('hidden');
+                enterCropMode();
             }
+        }
+
+        function enterCropMode() {
+            isCropMode = true;
+            
+            // Update header
+            const editHeader = document.getElementById('editHeader');
+            editHeader.classList.add('crop-mode');
+            editHeader.querySelector('h3').textContent = 'Crop Mode Active';
+            
+            // Hide regular controls
+            const regularControls = document.getElementById('regularControls');
+            const actionButtons = document.getElementById('actionButtons');
+            regularControls.style.display = 'none';
+            actionButtons.style.display = 'none';
+            
+            // Show crop actions
+            const cropActions = document.getElementById('cropActions');
+            cropActions.classList.add('active');
             
             updateCropArea();
         }
 
-        function startDrag(e) {
-            if (!isCropMode) return;
+        function exitCropMode() {
+            isCropMode = false;
             
-            isDragging = true;
-            currentHandle = null;
+            // Update header
+            const editHeader = document.getElementById('editHeader');
+            editHeader.classList.remove('crop-mode');
+            editHeader.querySelector('h3').textContent = 'Edit Image - Perfect Crop Tool';
             
-            const rect = e.currentTarget.getBoundingClientRect();
-            startX = (e.clientX || e.touches[0].clientX) - rect.left;
-            startY = (e.clientY || e.touches[0].clientY) - rect.top;
+            // Show regular controls
+            const regularControls = document.getElementById('regularControls');
+            const actionButtons = document.getElementById('actionButtons');
+            regularControls.style.display = 'grid';
+            actionButtons.style.display = 'flex';
             
-            e.preventDefault();
+            // Hide crop actions
+            const cropActions = document.getElementById('cropActions');
+            cropActions.classList.remove('active');
+            
+            // Update crop button
+            const cropBtn = document.getElementById('cropBtn');
+            cropBtn.innerHTML = '<i class="fas fa-crop mr-1"></i>Enable';
+            cropBtn.className = 'btn-success text-sm';
+            
+            updateCropArea();
         }
 
         function startHandleDrag(e, handle) {
@@ -615,7 +713,7 @@
             const currentY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : startY);
             
             if (currentHandle) {
-                // Handle resize
+                // Handle resize only
                 const deltaX = currentX - startX;
                 const deltaY = currentY - startY;
                 
@@ -652,27 +750,6 @@
                 // Ensure minimum size
                 if (cropData.width < 50) cropData.width = 50;
                 if (cropData.height < 50) cropData.height = 50;
-                
-                // Keep within bounds
-                if (cropData.x < 0) cropData.x = 0;
-                if (cropData.y < 0) cropData.y = 0;
-                if (cropData.x + cropData.width > cropData.imageWidth) {
-                    cropData.x = cropData.imageWidth - cropData.width;
-                }
-                if (cropData.y + cropData.height > cropData.imageHeight) {
-                    cropData.y = cropData.imageHeight - cropData.height;
-                }
-                
-                startX = currentX;
-                startY = currentY;
-                
-            } else {
-                // Handle move
-                const deltaX = currentX - startX;
-                const deltaY = currentY - startY;
-                
-                cropData.x += deltaX;
-                cropData.y += deltaY;
                 
                 // Keep within bounds
                 if (cropData.x < 0) cropData.x = 0;
@@ -752,8 +829,8 @@
                 ctx.putImageData(imageData, 0, 0);
             }
             
-            // Update image
-            const croppedDataURL = canvas.toDataURL('image/jpeg', 0.95);
+            // Update image with high quality
+            const croppedDataURL = canvas.toDataURL('image/jpeg', 1.0);
             editImage.src = croppedDataURL;
             
             // Create new image object
@@ -768,7 +845,29 @@
             newImg.src = croppedDataURL;
             
             // Exit crop mode
-            toggleCrop();
+            exitCropMode();
+        }
+
+        function resetCrop() {
+            // Reset to original crop area
+            const editImage = document.getElementById('editImage');
+            const rect = editImage.getBoundingClientRect();
+            
+            const cropWidth = rect.width * 0.8;
+            const cropHeight = rect.height * 0.8;
+            const cropX = (rect.width - cropWidth) / 2;
+            const cropY = (rect.height - cropHeight) / 2;
+            
+            cropData = {
+                x: cropX,
+                y: cropY,
+                width: cropWidth,
+                height: cropHeight,
+                imageWidth: rect.width,
+                imageHeight: rect.height
+            };
+            
+            updateCropArea();
         }
 
         function rotateImage(degrees) {
@@ -794,7 +893,7 @@
             
             ctx.drawImage(originalImage, 0, 0);
             
-            const rotatedDataURL = canvas.toDataURL('image/jpeg', 0.95);
+            const rotatedDataURL = canvas.toDataURL('image/jpeg', 1.0);
             const editImage = document.getElementById('editImage');
             editImage.src = rotatedDataURL;
             
@@ -851,7 +950,7 @@
                 ctx.putImageData(imageData, 0, 0);
             }
             
-            editImage.src = canvas.toDataURL('image/jpeg', 0.95);
+            editImage.src = canvas.toDataURL('image/jpeg', 1.0);
         }
 
         function resetImage() {
@@ -868,7 +967,7 @@
             document.getElementById('brightnessValue').textContent = '0';
             document.getElementById('contrastValue').textContent = '0';
             
-            if (isCropMode) toggleCrop();
+            if (isCropMode) exitCropMode();
             
             setTimeout(() => {
                 initializeCropArea();
@@ -893,17 +992,10 @@
         function closeEditModal() {
             document.getElementById('editModal').classList.add('hidden');
             currentEditIndex = -1;
-            isCropMode = false;
+            if (isCropMode) exitCropMode();
             cropData = null;
             isDragging = false;
             originalImage = null;
-            
-            // Reset crop controls
-            const cropBtn = document.getElementById('cropBtn');
-            const applyBtn = document.getElementById('applyBtn');
-            cropBtn.innerHTML = '<i class="fas fa-crop mr-1"></i>Enable';
-            cropBtn.className = 'btn-success text-sm';
-            applyBtn.classList.add('hidden');
         }
 
         function removeImage(index) {
@@ -948,11 +1040,12 @@
                         pdf.addPage();
                     }
                     
-                    pdf.addImage(image.src, 'JPEG', x, y, finalWidth, finalHeight, undefined, 'FAST');
+                    // Use high quality settings for better PDF clarity
+                    pdf.addImage(image.src, 'JPEG', x, y, finalWidth, finalHeight, undefined, 'FAST', 0);
                     
                     loadedImages++;
                     if (loadedImages === images.length) {
-                        const filename = `images_${new Date().toISOString().slice(0, 10)}.pdf`;
+                        const filename = `cropped_images_${new Date().toISOString().slice(0, 10)}.pdf`;
                         pdf.save(filename);
                     }
                 };
@@ -961,5 +1054,5 @@
         }
     </script>
 </body>
-</html>
+</html> 
 
