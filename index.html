@@ -456,11 +456,6 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            // Request notification permission
-            if ('Notification' in window && Notification.permission !== 'granted') {
-                Notification.requestPermission();
-            }
-            
             const fileInput = document.getElementById('fileInput');
             const cameraInput = document.getElementById('cameraInput');
             const dropZone = document.getElementById('dropZone');
@@ -1079,13 +1074,6 @@
                     if (loadedImages === images.length) {
                         const filename = `cropped_images_${new Date().toISOString().slice(0, 10)}.pdf`;
                         pdf.save(filename);
-                        // Show notification after saving
-                        if ("Notification" in window && Notification.permission === "granted") {
-                            new Notification('PDF Downloaded', {
-                                body: `Your PDF "${filename}" has been saved to Downloads.`,
-                                icon: 'icon-192.png'
-                            });
-                        }
                     }
                 };
                 img.src = image.src;
@@ -1093,4 +1081,5 @@
         }
     </script>
 </body>
-</html> 
+</html>
+
