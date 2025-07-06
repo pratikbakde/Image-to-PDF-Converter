@@ -1,9 +1,4 @@
 {
-  "name": "Image to PDF Converter",
-  "short_name": "PDFConvert",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#ffffff",
   "theme_color": "#007bff",
   "icons": [
     {
@@ -16,5 +11,6 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
-}
+  ],
+  "gcm_sender_id": "103953800507"
+} 
