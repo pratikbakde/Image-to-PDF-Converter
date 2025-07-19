@@ -1,6 +1,6 @@
 {
   "name": "Image To Pdf Converter",
-  "short_name": "Image To Pdf Converter",
+  "short_name": "Image To Pdf",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
