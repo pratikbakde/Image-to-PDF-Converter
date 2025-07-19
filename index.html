@@ -1,19 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#007bff">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image to PDF Converter</title>
+    <title>Image to PDF Converter with Perfect Crop Tool</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-  }
-</script>
     <style>
         .image-container {
             position: relative;
@@ -21,7 +14,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 200px;
+            min-height: 180px;
             background: #f8fafc;
             border-radius: 12px;
             overflow: hidden;
@@ -29,7 +22,7 @@
         
         .image-preview {
             max-width: 100%;
-            max-height: 300px;
+            max-height: 200px;
             width: auto;
             height: auto;
             object-fit: contain;
@@ -60,8 +53,8 @@
             border-radius: 8px;
             cursor: default;
             touch-action: none;
-            max-width: 90%;
-            max-height: 70vh;
+            max-width: 500px;
+            max-height: 400px;
             position: relative;
         }
         
@@ -107,7 +100,7 @@
         .crop-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
         
         .modal-content {
-            max-height: 95vh;
+            max-height: 90vh;
             overflow-y: auto;
         }
         
@@ -116,38 +109,6 @@
             border-radius: 8px;
             padding: 1rem;
             margin: 0.5rem 0;
-            transition: all 0.3s ease;
-        }
-        
-        .controls-section.hidden-in-crop {
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(0.9);
-        }
-        
-        .crop-actions {
-            display: none;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            text-align: center;
-        }
-        
-        .crop-actions.active {
-            display: block;
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
         
         .btn-primary {
@@ -198,49 +159,13 @@
             transform: translateY(-1px);
         }
         
-        .btn-crop-action {
-            background: rgba(255, 255, 255, 0.95);
-            color: #1f2937;
-            padding: 1rem 2rem;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            transition: all 0.2s;
-            cursor: pointer;
-            border: none;
-            margin: 0 0.5rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn-crop-action:hover {
-            background: white;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-        
-        .btn-crop-apply {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
-        
-        .btn-crop-apply:hover {
-            background: linear-gradient(135deg, #059669, #047857);
-        }
-        
-        .btn-crop-reset {
-            background: linear-gradient(135deg, #6b7280, #4b5563);
-            color: white;
-        }
-        
-        .btn-crop-reset:hover {
-            background: linear-gradient(135deg, #4b5563, #374151);
-        }
-        
         .image-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1rem;
             grid-auto-flow: row;
+            max-height: 600px;
+            overflow-y: auto;
         }
         
         .remove-btn {
@@ -275,35 +200,81 @@
             position: relative;
             display: inline-block;
         }
-        
-        .edit-header {
-            transition: all 0.3s ease;
-        }
-        
-        .edit-header.crop-mode {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .popup-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
             color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .hidden-during-crop {
+            display: block;
+        }
+
+        .crop-active .hidden-during-crop {
+            display: none !important;
+        }
+
+        .crop-controls {
+            display: none;
+        }
+
+        .crop-active .crop-controls {
+            display: flex !important;
+        }
+
+        .crop-active .crop-controls button {
+            background: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        body {
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
         }
         
         @media (max-width: 768px) {
             .image-grid {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                max-height: 400px;
             }
             
             .crop-canvas {
-                max-height: 50vh;
+                max-width: 300px;
+                max-height: 250px;
             }
         }
     </style>
 </head>
 <body class="bg-gray-50">
-    <div class="container mx-auto px-4 py-6 max-w-7xl">
+    <div class="container mx-auto px-4 py-6">
         <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
-                <i class="fas fa-crop text-blue-600"></i> Image to PDF Converter
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-crop text-blue-600"></i> Perfect Crop Image to PDF Converter
             </h1>
-            <p class="text-gray-600 text-sm sm:text-base">Upload, crop with precision, and convert to PDF</p>
+            <p class="text-gray-600">Upload, crop with precision, and convert to PDF</p>
         </div>
 
         <!-- Upload Section -->
@@ -320,9 +291,9 @@
             <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
             <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
             
-            <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
-                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
-                <p class="text-gray-600 text-sm sm:text-base">Or drag and drop images here</p>
+            <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
+                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                <p class="text-gray-600">Or drag and drop images here</p>
             </div>
         </div>
 
@@ -340,15 +311,15 @@
     <!-- Edit Modal -->
     <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen p-2">
-            <div class="bg-white rounded-lg w-full max-w-6xl modal-content">
-                <div id="editHeader" class="edit-header p-4 border-b flex justify-between items-center">
-                    <h3 class="text-xl font-semibold">Edit Image - Perfect Crop Tool</h3>
+            <div class="bg-white rounded-lg w-full max-w-5xl modal-content">
+                <div class="p-4 border-b flex justify-between items-center">
+                    <h3 class="text-xl font-semibold text-gray-800">Edit Image - Perfect Crop Tool</h3>
                     <button onclick="closeEditModal()" class="text-gray-500 hover:text-gray-700">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
                 
-                <div class="p-4">
+                <div id="editModalContent" class="p-4">
                     <!-- Image Display -->
                     <div class="flex justify-center mb-4">
                         <div class="canvas-container">
@@ -364,18 +335,8 @@
                         </div>
                     </div>
                     
-                    <!-- Crop Action Buttons (Only visible during crop mode) -->
-                    <div id="cropActions" class="crop-actions">
-                        <button onclick="applyCrop()" class="btn-crop-action btn-crop-apply">
-                            <i class="fas fa-check mr-2"></i>Apply
-                        </button>
-                        <button onclick="resetCrop()" class="btn-crop-action btn-crop-reset">
-                            <i class="fas fa-undo mr-2"></i>Reset
-                        </button>
-                    </div>
-                    
-                    <!-- Regular Editing Controls -->
-                    <div id="regularControls" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Editing Controls -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 hidden-during-crop">
                         <!-- Rotate Controls -->
                         <div class="controls-section">
                             <h4 class="font-semibold text-gray-700 mb-3 text-center">Rotate</h4>
@@ -425,9 +386,19 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Crop Mode Controls -->
+                    <div class="crop-controls justify-center gap-4 mt-4">
+                        <button onclick="applyCrop()" class="btn-success px-6 py-3">
+                            <i class="fas fa-check mr-2"></i>Apply
+                        </button>
+                        <button onclick="resetCrop()" class="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-undo mr-2"></i>Reset
+                        </button>
+                    </div>
                     
                     <!-- Action Buttons -->
-                    <div id="actionButtons" class="flex flex-col sm:flex-row gap-4 mt-6 pt-4 border-t">
+                    <div class="flex flex-col sm:flex-row gap-4 mt-6 pt-4 border-t hidden-during-crop">
                         <button onclick="resetImage()" class="flex-1 bg-gray-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
                             <i class="fas fa-undo mr-2"></i>Reset All
                         </button>
@@ -503,6 +474,20 @@
             document.addEventListener('touchend', endDrag);
         }
 
+        function showPopupMessage(message) {
+            const popup = document.createElement('div');
+            popup.className = 'popup-message';
+            popup.innerHTML = `<i class="fas fa-download mr-2"></i>${message}`;
+            document.body.appendChild(popup);
+
+            setTimeout(() => {
+                popup.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => {
+                    document.body.removeChild(popup);
+                }, 300);
+            }, 3000);
+        }
+
         function takePhoto() {
             document.getElementById('cameraInput').click();
         }
@@ -572,12 +557,16 @@
             rotation = 0;
             brightness = 0;
             contrast = 0;
+            isCropMode = false;
             
             // Reset controls
             document.getElementById('brightnessSlider').value = 0;
             document.getElementById('contrastSlider').value = 0;
             document.getElementById('brightnessValue').textContent = '0';
             document.getElementById('contrastValue').textContent = '0';
+            document.getElementById('editModalContent').classList.remove('crop-active');
+            document.getElementById('cropBtn').innerHTML = '<i class="fas fa-crop mr-1"></i>Enable';
+            document.getElementById('cropBtn').className = 'btn-success text-sm';
             
             // Setup image
             const editImage = document.getElementById('editImage');
@@ -588,11 +577,6 @@
             editImage.onload = () => {
                 initializeCropArea();
             };
-            
-            // Reset crop mode
-            if (isCropMode) {
-                exitCropMode();
-            }
             
             // Show modal
             document.getElementById('editModal').classList.remove('hidden');
@@ -643,56 +627,14 @@
         }
 
         function toggleCrop() {
+            isCropMode = !isCropMode;
+            const modalContent = document.getElementById('editModalContent');
+            
             if (isCropMode) {
-                exitCropMode();
+                modalContent.classList.add('crop-active');
             } else {
-                enterCropMode();
+                modalContent.classList.remove('crop-active');
             }
-        }
-
-        function enterCropMode() {
-            isCropMode = true;
-            
-            // Update header
-            const editHeader = document.getElementById('editHeader');
-            editHeader.classList.add('crop-mode');
-            editHeader.querySelector('h3').textContent = 'Crop Mode Active';
-            
-            // Hide regular controls
-            const regularControls = document.getElementById('regularControls');
-            const actionButtons = document.getElementById('actionButtons');
-            regularControls.style.display = 'none';
-            actionButtons.style.display = 'none';
-            
-            // Show crop actions
-            const cropActions = document.getElementById('cropActions');
-            cropActions.classList.add('active');
-            
-            updateCropArea();
-        }
-
-        function exitCropMode() {
-            isCropMode = false;
-            
-            // Update header
-            const editHeader = document.getElementById('editHeader');
-            editHeader.classList.remove('crop-mode');
-            editHeader.querySelector('h3').textContent = 'Edit Image - Perfect Crop Tool';
-            
-            // Show regular controls
-            const regularControls = document.getElementById('regularControls');
-            const actionButtons = document.getElementById('actionButtons');
-            regularControls.style.display = 'grid';
-            actionButtons.style.display = 'flex';
-            
-            // Hide crop actions
-            const cropActions = document.getElementById('cropActions');
-            cropActions.classList.remove('active');
-            
-            // Update crop button
-            const cropBtn = document.getElementById('cropBtn');
-            cropBtn.innerHTML = '<i class="fas fa-crop mr-1"></i>Enable';
-            cropBtn.className = 'btn-success text-sm';
             
             updateCropArea();
         }
@@ -873,29 +815,13 @@
             newImg.src = croppedDataURL;
             
             // Exit crop mode
-            exitCropMode();
+            toggleCrop();
         }
 
         function resetCrop() {
-            // Reset to original crop area
-            const editImage = document.getElementById('editImage');
-            const rect = editImage.getBoundingClientRect();
-            
-            const cropWidth = rect.width * 0.8;
-            const cropHeight = rect.height * 0.8;
-            const cropX = (rect.width - cropWidth) / 2;
-            const cropY = (rect.height - cropHeight) / 2;
-            
-            cropData = {
-                x: cropX,
-                y: cropY,
-                width: cropWidth,
-                height: cropHeight,
-                imageWidth: rect.width,
-                imageHeight: rect.height
-            };
-            
-            updateCropArea();
+            if (isCropMode) {
+                initializeCropArea();
+            }
         }
 
         function rotateImage(degrees) {
@@ -995,7 +921,7 @@
             document.getElementById('brightnessValue').textContent = '0';
             document.getElementById('contrastValue').textContent = '0';
             
-            if (isCropMode) exitCropMode();
+            if (isCropMode) toggleCrop();
             
             setTimeout(() => {
                 initializeCropArea();
@@ -1019,8 +945,9 @@
 
         function closeEditModal() {
             document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editModalContent').classList.remove('crop-active');
             currentEditIndex = -1;
-            if (isCropMode) exitCropMode();
+            isCropMode = false;
             cropData = null;
             isDragging = false;
             originalImage = null;
@@ -1074,6 +1001,7 @@
                     if (loadedImages === images.length) {
                         const filename = `cropped_images_${new Date().toISOString().slice(0, 10)}.pdf`;
                         pdf.save(filename);
+                        showPopupMessage('PDF is downloaded in download section');
                     }
                 };
                 img.src = image.src;
@@ -1082,4 +1010,3 @@
     </script>
 </body>
 </html>
-
