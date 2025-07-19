@@ -1,6 +1,6 @@
 {
-  "name": "My Cool App",
-  "short_name": "CoolApp",
+  "name": "Image To Pdf Converter",
+  "short_name": "Image To Pdf Converter",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
